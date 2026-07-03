@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #000000;
+  color: #e6e3da;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Black canvas with a warm gold glow rising from the lower-left (brand hero). */
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      130% 95% at 0% 100%,
+      rgba(184, 145, 60, 0.30),
+      rgba(120, 95, 40, 0.06) 38%,
+      transparent 60%
+    ),
+    #000000;
+  background-attachment: fixed;
+}
+
+@layer components {
+  .kicker {
+    @apply font-mono text-[12px] uppercase tracking-kicker text-gold;
+  }
+  .eyebrow {
+    @apply font-mono text-[11px] uppercase tracking-eyebrow text-muted;
+  }
+  .lab {
+    @apply font-mono text-[11px] uppercase tracking-label text-muted;
+  }
+
+  /* Quiz / choice option button. */
+  .opt {
+    @apply flex w-full items-start gap-3.5 rounded-[13px] border border-line bg-card px-[17px] py-4 text-left text-base leading-snug text-body transition;
+  }
+  .opt:hover {
+    border-color: #4a4030;
+    background: #1b1712;
+  }
+  .opt.sel {
+    border-color: #c9a24b;
+    background: rgba(201, 162, 75, 0.09);
+  }
+  .opt .ltr {
+    @apply mt-px flex h-6 w-6 flex-none items-center justify-center rounded-md border border-line bg-[#100E0B] font-mono text-[12px] text-muted;
+  }
+  .opt.sel .ltr {
+    @apply border-gold bg-gold text-[#15110A];
+  }
+}
+
+:focus-visible {
+  outline: 2px solid #e4c66b;
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
