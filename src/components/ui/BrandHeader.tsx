@@ -1,14 +1,21 @@
 import { Fragment } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { clsx } from "@/lib/clsx";
 import { CheckIcon } from "@/components/ui/icons";
 
-/** EpiMinded wordmark. "EPI" heavy + "MINDED" gold, approximating the logo. */
+/** EpiMinded logo wordmark. */
 export function Wordmark() {
   return (
-    <Link href="/" className="font-mono text-[19px] font-bold tracking-tight">
-      <span className="text-paper">EPI</span>
-      <span className="text-gold">MINDED</span>
+    <Link href="/" className="inline-flex shrink-0 items-center">
+      <Image
+        src="/epiminded-logo.png"
+        alt="EpiMinded"
+        width={500}
+        height={500}
+        className="h-32 w-auto sm:h-48"
+        priority
+      />
     </Link>
   );
 }
@@ -53,7 +60,7 @@ export function BrandHeader({
       {typeof step === "number" && (
         <nav
           aria-label="Onboarding progress"
-          className="absolute left-1/2 flex -translate-x-1/2 items-center gap-1.5 sm:gap-2.5"
+          className="absolute left-1/2 top-[calc(50%+36px)] flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 sm:gap-2.5"
         >
           {ONBOARDING_STEPS.map((label, i) => {
             const done = i < step;

@@ -94,12 +94,12 @@ function ToggleBtn({
 
 function subscribeButtonClass(recommended: boolean, disabled = false) {
   return clsx(
-    "mt-10 mt-auto flex w-full min-h-[48px] touch-manipulation items-center justify-center rounded-full px-4 py-3.5 text-center font-sans text-[clamp(14px,2.2vw,17px)] font-semibold leading-none transition sm:min-h-[52px] sm:px-5 sm:py-4 lg:min-h-[56px] lg:py-5",
+    "mt-14 mt-auto box-border flex h-14 w-full shrink-0 touch-manipulation items-center justify-center rounded-full border-2 px-6 text-center font-sans text-[16px] font-semibold leading-none transition",
     disabled
-      ? "cursor-not-allowed border border-line bg-card text-muted opacity-60"
+      ? "cursor-not-allowed border-line bg-card text-muted opacity-60"
       : recommended
-        ? "bg-gold-cta text-[#15110A] hover:bg-gold-hi active:scale-[0.98]"
-        : "border border-line bg-card text-body hover:border-gold active:scale-[0.98]",
+        ? "border-transparent bg-gold-cta text-[#15110A] hover:bg-gold-hi active:scale-[0.98]"
+        : "border-line bg-card text-body hover:border-gold active:scale-[0.98]",
   );
 }
 
