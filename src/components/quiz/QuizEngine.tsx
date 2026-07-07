@@ -126,14 +126,19 @@ function Intro({ onBegin }: { onBegin: () => void }) {
     <div className="flex min-h-screen flex-col">
       <BrandHeader step={0} />
       <main className="mx-auto flex w-full max-w-[640px] flex-1 flex-col justify-center px-[22px] pb-16">
-        <div className="animate-rise">
-          <p className="kicker mb-[18px]">Step 1 · Find your profile</p>
-          <h1 className="m-0 mb-[18px] font-display text-[clamp(32px,5.5vw,48px)] font-semibold leading-[1.08] tracking-[-0.01em] text-paper">
-            Let’s find your <em className="italic text-gold">strategic profile</em>
+        <div className="animate-rise text-center">
+          <div className="mb-[18px] flex justify-center">
+            <span className="inline-block rounded-full border border-gold/40 px-5 py-2 font-mono text-[12px] uppercase tracking-eyebrow text-gold">
+              Step 1 · Find your profile
+            </span>
+          </div>
+          <h1 className="m-0 mb-[22px] font-display text-[clamp(32px,5.5vw,48px)] font-semibold leading-[1.08] tracking-[-0.01em] text-paper">
+            Let&apos;s find your{" "}
+            <em className="italic text-gold">strategic profile</em>
           </h1>
-          <p className="m-0 mb-[30px] max-w-[34em] text-[17px] leading-[1.6] text-ash">
+          <p className="mx-auto m-0 mb-[30px] max-w-[34em] text-[17px] leading-[1.6] text-ash">
             Seven quick questions on how you read change, make the call, and stay
-            ahead. We’ll map the profile that defines how you operate, the blind
+            ahead. We&apos;ll map the profile that defines how you operate, the blind
             spot holding you back, and the cohort that would sharpen you.
           </p>
           <Button onClick={onBegin}>Begin →</Button>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { clsx } from "@/lib/clsx";
 import { useFunnel } from "@/lib/funnel/store";
 import {
@@ -12,21 +11,24 @@ import {
   type PlanOffer,
 } from "@/lib/config";
 
+export type ProductIdMap = Record<string, string | undefined>;
+
+function productKey(offerId: string, interval: BillingInterval): string {
+  return `${offerId}:${interval}`;
+}
+
 /**
  * Pricing: three frequency tiers (Lite / Standard / Pro) that share the full
- * feature set — only the booster cadence and price differ. An optional paid
- * voice-print add-on can be toggled in. Choosing a tier stores the selection
- * (tier + interval + add-on) and advances to checkout.
+ * feature set — only the booster cadence and price differ. Subscribe CTAs link
+ * directly to Polar checkout via /checkout?products=...
  */
-export function PricingPlans() {
-  const router = useRouter();
+export function PricingPlans({ productIds }: { productIds: ProductIdMap }) {
   const { selectOffer } = useFunnel();
   const [interval, setInterval] = useState<BillingInterval>("month");
   const [addon, setAddon] = useState(false);
 
   const choose = (offer: PlanOffer) => {
     selectOffer({ offerId: offer.id, interval, addon });
-    router.push("/checkout");
   };
 
   return (
@@ -44,7 +46,13 @@ export function PricingPlans() {
       {/* tier cards */}
       <div className="grid gap-3 sm:grid-cols-3">
         {TIERS.map((tier) => (
-          <PlanCard key={tier.id} offer={tier} interval={interval} onChoose={choose} />
+          <PlanCard
+            key={tier.id}
+            offer={tier}
+            interval={interval}
+            productId={productIds[productKey(tier.id, interval)]}
+            onChoose={choose}
+          />
         ))}
       </div>
 
@@ -118,15 +126,18 @@ function ToggleBtn({
 function PlanCard({
   offer,
   interval,
+  productId,
   onChoose,
 }: {
   offer: PlanOffer;
   interval: BillingInterval;
+  productId: string | undefined;
   onChoose: (offer: PlanOffer) => void;
 }) {
   const isAnnual = interval === "year";
   const price = isAnnual ? offer.annualLabel : offer.monthlyLabel;
   const unit = isAnnual ? "/ year" : "/ user / month";
+  const checkoutHref = productId ? `/checkout?products=${productId}` : undefined;
 
   return (
     <div
@@ -153,17 +164,33 @@ function PlanCard({
 
       <p className="mt-3 text-[14px] leading-[1.5] text-ash">{offer.blurb}</p>
 
-      <button
-        onClick={() => onChoose(offer)}
-        className={clsx(
-          "mt-auto w-full rounded-full py-3 font-sans text-[15px] font-semibold transition",
-          offer.recommended
-            ? "bg-gold-cta text-[#15110A] hover:bg-gold-hi"
-            : "border border-line bg-card text-body hover:border-gold",
-        )}
-      >
-        Choose {offer.name}
-      </button>
+      {checkoutHref ? (
+        <a
+          href={checkoutHref}
+          onClick={() => onChoose(offer)}
+          className={clsx(
+            "mt-auto w-full rounded-full py-3 text-center font-sans text-[15px] font-semibold transition",
+            offer.recommended
+              ? "bg-gold-cta text-[#15110A] hover:bg-gold-hi"
+              : "border border-line bg-card text-body hover:border-gold",
+          )}
+        >
+          Subscribe
+        </a>
+      ) : (
+        <button
+          type="button"
+          disabled
+          className="mt-auto w-full cursor-not-allowed rounded-full border border-line bg-card py-3 font-sans text-[15px] font-semibold text-muted opacity-60"
+        >
+          Subscribe
+        </button>
+      )}
+      {!productId && (
+        <p className="mt-2 text-center font-mono text-[10px] text-muted">
+          Set POLAR_PRODUCT_{offer.id.toUpperCase()}_{interval.toUpperCase()}
+        </p>
+      )}
     </div>
   );
 }

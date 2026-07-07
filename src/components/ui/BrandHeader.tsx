@@ -34,7 +34,12 @@ export function BrandHeader({
   step?: number;
 }) {
   return (
-    <header className="mx-auto flex w-full max-w-[1180px] items-center justify-between px-6 py-6">
+    <header
+      className={clsx(
+        "mx-auto flex w-full max-w-[1180px] items-center px-6 py-6",
+        typeof step === "number" ? "relative justify-start" : "justify-between",
+      )}
+    >
       <Wordmark />
       {full && (
         <nav className="hidden items-center gap-8 text-[15px] text-paper md:flex">
@@ -48,7 +53,7 @@ export function BrandHeader({
       {typeof step === "number" && (
         <nav
           aria-label="Onboarding progress"
-          className="flex items-center gap-1.5 sm:gap-2.5"
+          className="absolute left-1/2 flex -translate-x-1/2 items-center gap-1.5 sm:gap-2.5"
         >
           {ONBOARDING_STEPS.map((label, i) => {
             const done = i < step;

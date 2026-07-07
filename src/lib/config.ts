@@ -108,19 +108,19 @@ export const ADDON = {
   annualLabel: "$79",
 } as const;
 
-/** Is a real Stripe integration configured? If not, the funnel mocks payment. */
-export const STRIPE_ENABLED = Boolean(process.env.STRIPE_SECRET_KEY);
+/** Is Polar checkout configured? */
+export const POLAR_ENABLED = Boolean(process.env.POLAR_ACCESS_TOKEN);
 
 /**
- * Per-offer Stripe price id lookup (only used in Stripe mode). Set env vars
- * like STRIPE_PRICE_STANDARD_MONTH / STRIPE_PRICE_STANDARD_YEAR.
+ * Per-offer Polar product id lookup. Set env vars like
+ * POLAR_PRODUCT_STANDARD_MONTH / POLAR_PRODUCT_STANDARD_YEAR.
  */
-export function stripePriceIdFor(
+export function polarProductIdFor(
   offerId: string,
   interval: BillingInterval,
 ): string | undefined {
-  const key = `STRIPE_PRICE_${offerId.toUpperCase()}_${interval.toUpperCase()}`;
-  return process.env[key] || process.env.STRIPE_PRICE_ID || undefined;
+  const key = `POLAR_PRODUCT_${offerId.toUpperCase()}_${interval.toUpperCase()}`;
+  return process.env[key] || undefined;
 }
 
 export const DEEPLINK = {

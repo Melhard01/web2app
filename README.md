@@ -2,12 +2,12 @@
 
 The **web funnel** from the acquisition flow: an ad-driven **Strategic Posture**
 quiz (Scout / Analyst / Operator / Seeker) that builds intent to pay, a
-personalized posture report (onboarding), the **Track B** pricing paywall, email +
-payment, account provisioning with a **signed entitlement token**, and a
+personalized posture report (onboarding), the **Track B** pricing paywall, Polar
+checkout, account provisioning with a **signed entitlement token**, and a
 **multi-rail handoff** into the mobile app. Brand: navy/gold, Fraunces + Inter Tight.
 
 ```
-Ad / landing  →  Quiz  →  Report  →  Paywall  →  Checkout (email + pay)
+Ad / landing  →  Quiz  →  Report  →  Paywall  →  Polar checkout
                                                       │
                                           Provision + signed token
                                                       │
@@ -25,21 +25,19 @@ npm install
 npm run dev      # http://localhost:3000
 ```
 
-With **no environment variables**, the funnel runs in **mock mode**: payment is
-simulated and accounts/tokens are minted in-memory, so you can click the whole
-path end to end immediately.
+Configure Polar env vars in `.env.local` to enable real checkout (see below).
 
 ## Modes
 
-| Concern        | Mock (default)                     | Configured                                  |
+| Concern        | Unconfigured                       | Configured                                  |
 | -------------- | ---------------------------------- | ------------------------------------------- |
-| Payment        | Simulated instant success          | Stripe Checkout (`STRIPE_SECRET_KEY`)       |
-| Provision      | In-memory account (`provision.ts`) | Same code — swap the `Map` for a real DB    |
+| Payment        | Subscribe buttons disabled         | Polar Checkout (`POLAR_ACCESS_TOKEN`)       |
+| Provision      | In-memory account (`provision.ts`) | Wire Polar webhook → `provisionAccount`     |
 | Token          | HS256 JWT, dev secret              | Set `ENTITLEMENT_TOKEN_SECRET`              |
 
-Copy `.env.example` → `.env.local` and fill in Stripe keys + `STRIPE_PRICE_ID`
-(a recurring price) to switch payment to real Stripe. Point a Stripe webhook at
-`/api/webhook` for authoritative provisioning.
+Copy `.env.example` → `.env.local` and fill in Polar sandbox credentials +
+`POLAR_PRODUCT_*` ids. Point a Polar webhook at `/api/webhook/polar` for
+authoritative provisioning.
 
 ## Content sources
 
@@ -47,10 +45,9 @@ Copy `.env.example` → `.env.local` and fill in Stripe keys + `STRIPE_PRICE_ID`
   Posture" content). Scoring counts option `key`s across scored questions and
   resolves a dominant posture with deterministic tie-breaks (`src/lib/quiz/scoring.ts`).
   To change content, edit that one config object — no component changes.
-- **Pricing** (Track B retail) lives in `src/lib/config.ts`: Plan 1 Community
-  ($11.99/mo · $119/yr) and Plan 2 Lite/Standard/Pro ($19.99 / $29.99 / $39.99,
-  annual $199 / $299 / $399). Track A (enterprise per-seat) is sales-led and not
-  exposed in this self-serve funnel.
+- **Pricing** (Track B retail) lives in `src/lib/config.ts`: Lite/Standard/Pro
+  ($19.99 / $29.99 / $39.99, annual $199 / $299 / $399). Track A (enterprise
+  per-seat) is sales-led and not exposed in this self-serve funnel.
 
 ## Layout
 
@@ -60,21 +57,19 @@ src/
     page.tsx                 Landing (ad hook → quiz)
     quiz/                    Quiz engine page
     report/                  Personalized report (onboarding payoff)
-    paywall/                 Web paywall (lower web price)
-    checkout/                Email + pay
-    success/                 Provision + multi-rail handoff
+    paywall/                 Web paywall (plan selection)
+    checkout/                Polar checkout redirect (GET route)
+    success/                 Payment confirmation
     api/
-      checkout/              Start payment (Stripe or mock)
-      provision/             Verify payment → mint account + entitlement token
+      provision/             Mint account + entitlement token
       entitlement/verify/    Sample of what the app does on first open
-      webhook/               Stripe webhook (authoritative provisioning)
-  components/                quiz · report · checkout · handoff · ui
+      webhook/polar/         Polar webhook (authoritative provisioning)
+  components/                quiz · report · paywall · handoff · ui
   lib/
     quiz/                    config · types · scoring
     funnel/store.tsx         Cross-page funnel state (sessionStorage)
     entitlement/             token (JWT) · handoff (rail links)
     provision.ts             Mock account + token minting
-    stripe/server.ts         Lazy Stripe client
     config.ts                Pricing + app config
 ```
 
@@ -82,9 +77,7 @@ src/
 
 - **Compliance:** the web (lower) price lives only on the web and is never linked
   from inside the app; IAP stays in-app.
-- **Identity:** the entitlement binds to the email captured at checkout, so it’s
+- **Identity:** the entitlement binds to the email captured at checkout, so it's
   portable across web/iOS/Android.
-- **Recovery:** email is captured with consent for cart recovery; the paywall
-  offers a **Restore** path before charging.
-- **Idempotency:** provisioning is keyed by email, so the `/success` redirect and
-  the Stripe webhook can both run safely.
+- **Recovery:** the paywall offers a **Restore** path before charging.
+- **Idempotency:** provisioning is keyed by email, so webhook retries are safe.
