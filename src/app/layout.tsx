@@ -17,7 +17,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${interTight.variable} ${jetbrainsMono.variable}`}
+      className={`${fraunces.variable} ${interTight.variable} ${jetbrainsMono.variable} overflow-x-hidden`}
     >
       <body className="min-h-screen bg-canvas font-sans text-body antialiased">
         <FunnelProvider>{children}</FunnelProvider>

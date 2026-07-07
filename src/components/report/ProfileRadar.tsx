@@ -59,17 +59,18 @@ export function ProfileRadar({
   const dataPolygon = polygon(axes.map((a) => a.vertex));
 
   return (
-    <div className="rounded-[16px] border border-line bg-card2 px-5 pb-4 pt-5">
+    <div className="premium-card flex min-h-[380px] flex-col px-6 pb-4 pt-5">
       <p className="lab mb-1">How you scored across the four profiles</p>
 
-      <svg
-        viewBox="0 0 300 264"
-        role="img"
-        aria-label={`Radar chart of your strategic profile scores. Dominant: ${
-          QUIZ.profiles[activeKey]?.name ?? activeKey
-        }.`}
-        className="mx-auto block w-full max-w-[340px]"
-      >
+      <div className="flex flex-1 items-center justify-center">
+        <svg
+          viewBox="0 0 300 264"
+          role="img"
+          aria-label={`Radar chart of your strategic profile scores. Dominant: ${
+            QUIZ.profiles[activeKey]?.name ?? activeKey
+          }.`}
+          className="mx-auto block h-full w-full max-h-[280px] max-w-[340px]"
+        >
         {/* concentric grid rings */}
         {Array.from({ length: RINGS }, (_, level) => {
           const r = (R * (level + 1)) / RINGS;
@@ -156,7 +157,8 @@ export function ProfileRadar({
             </text>
           );
         })}
-      </svg>
+        </svg>
+      </div>
     </div>
   );
 }

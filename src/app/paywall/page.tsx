@@ -24,12 +24,16 @@ export default function PaywallPage() {
       <Suspense fallback={null}>
         <PaywallCanceledBanner />
       </Suspense>
-      <main className="mx-auto w-full max-w-[680px] px-[22px] pb-16">
-        <p className="kicker mb-[18px]">Step 2 · Choose your plan</p>
-        <h1 className="m-0 mb-[18px] font-display text-[clamp(30px,5vw,46px)] font-semibold leading-[1.08] tracking-[-0.01em] text-paper">
+      <main className="mx-auto w-full max-w-[1240px] px-8 pb-20 pt-12 sm:px-12 sm:pt-16 lg:px-20">
+        <div className="mb-6 flex justify-center">
+          <span className="inline-block rounded-full border border-gold/40 px-5 py-2 font-mono text-[12px] uppercase tracking-eyebrow text-gold">
+            Step 2 · Choose your plan
+          </span>
+        </div>
+        <h1 className="m-0 mb-6 font-display text-[clamp(30px,5vw,46px)] font-semibold leading-[1.08] tracking-[-0.01em] text-paper">
           Your matched Peers and Network waiting for you
         </h1>
-        <p className="m-0 mb-9 max-w-[34em] text-[17px] leading-[1.6] text-ash">
+        <p className="m-0 mb-12 max-w-[34em] text-[17px] leading-[1.6] text-ash">
           A private peer network that helps you stay ahead of what is coming — a daily
           thinking ritual paired with a cohort of matched peers no tool can give you.
           Every tier ships the full experience; pick the cadence that fits you.

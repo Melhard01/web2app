@@ -1,5 +1,6 @@
 "use client";
 
+import { clsx } from "@/lib/clsx";
 import { ButtonLink, Arrow } from "@/components/ui/Button";
 import { ProfileRadar } from "./ProfileRadar";
 import {
@@ -30,46 +31,50 @@ export function ReportView({
   const Icon = PROFILE_ICONS[profileKey] ?? ScoutIcon;
 
   return (
-    <div className="flex flex-col gap-4 animate-rise">
-      <p className="eyebrow">Your dominant profile</p>
-
-      {/* hero card */}
-      <div className="overflow-hidden rounded-[20px] border border-gold/40 bg-card2">
-        <div className="flex items-center gap-4 border-b border-line bg-[rgba(201,162,75,0.07)] px-6 py-5">
-          <span className="grid h-14 w-14 flex-none place-items-center rounded-2xl border border-gold/40 bg-card text-gold">
-            <Icon className="h-7 w-7" />
-          </span>
-          <div>
-            <div className="font-display text-[clamp(28px,5vw,40px)] font-semibold leading-none text-gold">
-              {profile.name}
+    <div className="flex flex-col gap-8 animate-rise sm:gap-10">
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch lg:gap-8">
+        {/* dominant profile — left */}
+        <div className="premium-card flex min-h-[380px] flex-col">
+          <p className="lab px-6 pb-1 pt-5">Your dominant profile</p>
+          <div className="premium-card-header flex items-center gap-4 px-6 py-5">
+            <span className="premium-icon-wrap h-14 w-14 flex-none">
+              <Icon className="h-7 w-7" />
+            </span>
+            <div>
+              <div className="font-display text-[clamp(28px,5vw,40px)] font-semibold leading-none text-gold">
+                {profile.name}
+              </div>
+              <p className="mt-1.5 font-display text-[15px] italic text-gold-hi">
+                {profile.mantra}
+              </p>
             </div>
-            <p className="mt-1.5 font-display text-[15px] italic text-gold-hi">
-              {profile.mantra}
-            </p>
           </div>
+          <p className="flex flex-1 items-start px-6 py-5 text-[clamp(16px,2.4vw,19px)] leading-[1.5] text-white">
+            {profile.result}
+          </p>
         </div>
-        <p className="px-6 py-5 text-[clamp(16px,2.4vw,19px)] leading-[1.5] text-white">
-          {profile.result}
-        </p>
+
+        {/* score radar — right */}
+        <ProfileRadar scores={scores} maxScore={maxScore} activeKey={profileKey} />
       </div>
 
-      {/* score radar */}
-      <ProfileRadar scores={scores} maxScore={maxScore} activeKey={profileKey} />
-
       {/* insight cards */}
-      <InsightCard
-        icon={<ExposedIcon className="h-5 w-5" />}
-        label="Where you are exposed"
-        body={profile.exposed}
-      />
-      <InsightCard
-        icon={<CohortIcon className="h-5 w-5" />}
-        label="What a matched cohort gives you"
-        body={profile.cohort}
-      />
+      <div className="flex flex-col gap-4">
+        <InsightCard
+          icon={<ExposedIcon className="h-5 w-5" />}
+          label="Where you are exposed"
+          body={profile.exposed}
+        />
+        <InsightCard
+          icon={<CohortIcon className="h-5 w-5" />}
+          label="What a matched cohort gives you"
+          body={profile.cohort}
+          className="-mt-1"
+        />
+      </div>
 
       {/* CTA */}
-      <div className="mt-3">
+      <div className="-mt-2">
         <ButtonLink href="/paywall">
           Choose your plan <Arrow />
         </ButtonLink>
@@ -82,14 +87,16 @@ function InsightCard({
   icon,
   label,
   body,
+  className,
 }: {
   icon: React.ReactNode;
   label: string;
   body: string;
+  className?: string;
 }) {
   return (
-    <div className="flex gap-4 rounded-[16px] border border-line bg-card2 p-5">
-      <span className="grid h-10 w-10 flex-none place-items-center rounded-xl border border-line bg-card text-gold">
+    <div className={clsx("premium-card flex gap-4 p-5", className)}>
+      <span className="premium-icon-wrap h-10 w-10 flex-none">
         {icon}
       </span>
       <div>
