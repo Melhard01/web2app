@@ -94,7 +94,7 @@ function ToggleBtn({
 
 function subscribeButtonClass(recommended: boolean, disabled = false) {
   return clsx(
-    "mt-14 mt-auto box-border flex h-14 w-full shrink-0 touch-manipulation items-center justify-center rounded-full border-2 px-6 text-center font-sans text-[16px] font-semibold leading-none transition",
+    "mt-16 mt-auto box-border flex h-14 w-full shrink-0 touch-manipulation items-center justify-center rounded-full border-2 px-6 text-center font-sans text-[16px] font-semibold leading-none transition",
     disabled
       ? "cursor-not-allowed border-line bg-card text-muted opacity-60"
       : recommended
