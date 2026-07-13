@@ -236,7 +236,7 @@ export default function PreCheckoutPage() {
 
         <form
           onSubmit={onSubmit}
-          className="rounded-[28px] border border-gold/60 bg-[#050505] p-8 shadow-[0_0_0_1px_rgba(212,175,55,0.15)] sm:p-10"
+          className="rounded-[28px] border border-gold/70 bg-[linear-gradient(160deg,rgba(255,255,255,0.12)_0%,rgba(255,255,255,0.05)_45%,rgba(255,255,255,0.02)_100%)] p-8 backdrop-blur-2xl ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-20px_40px_rgba(0,0,0,0.42),0_0_0_1px_rgba(212,175,55,0.16),0_14px_36px_rgba(0,0,0,0.5)] sm:p-10"
           noValidate
         >
           {backendFieldErrors.general && (

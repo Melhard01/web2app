@@ -40,7 +40,7 @@ export function MultiRailHandoff({ result }: { result: ProvisionResult }) {
       </header>
 
       {/* Activation guide — the mental model before the store actions. */}
-      <section className="rounded-[18px] border border-gold/60 bg-[#050505] p-6 shadow-[0_0_0_1px_rgba(212,175,55,0.15)]">
+      <section className="rounded-[18px] border border-gold/70 bg-[linear-gradient(160deg,rgba(255,255,255,0.12)_0%,rgba(255,255,255,0.05)_45%,rgba(255,255,255,0.02)_100%)] p-6 backdrop-blur-2xl ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-20px_40px_rgba(0,0,0,0.42),0_0_0_1px_rgba(212,175,55,0.16),0_14px_36px_rgba(0,0,0,0.5)]">
         <p className="lab mb-4">What happens next</p>
         <ol className="flex flex-col gap-4">
           <NextStep
@@ -65,8 +65,10 @@ export function MultiRailHandoff({ result }: { result: ProvisionResult }) {
         </ol>
       </section>
 
-      <p className="text-center font-mono text-[11px] uppercase tracking-label text-muted">
-        Scan or tap to install on your phone
+      <p className="text-center">
+        <span className="inline-block rounded-full border border-line bg-card px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-label text-muted">
+          Scan or tap to install on your phone
+        </span>
       </p>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -130,7 +132,7 @@ function StoreSection({
   cta: string;
 }) {
   return (
-    <section className="flex min-h-[430px] flex-col items-center gap-4 rounded-[2px] border border-gold/70 bg-[#020202] px-5 pb-5 pt-14 shadow-[0_0_0_1px_rgba(212,175,55,0.18)]">
+    <section className="flex min-h-[430px] flex-col items-center gap-4 rounded-[2px] border border-gold/70 bg-[linear-gradient(160deg,rgba(255,255,255,0.12)_0%,rgba(255,255,255,0.05)_45%,rgba(255,255,255,0.02)_100%)] px-5 pb-5 pt-14 backdrop-blur-2xl ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-20px_40px_rgba(0,0,0,0.42),0_0_0_1px_rgba(212,175,55,0.16),0_14px_36px_rgba(0,0,0,0.5)]">
       <div className="flex items-center gap-2.5">
         <span className="grid h-9 w-9 flex-none place-items-center rounded-lg border border-gold/30 bg-[#0A0A0A] text-paper">
           {icon}

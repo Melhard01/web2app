@@ -59,7 +59,7 @@ export function ProfileRadar({
   const dataPolygon = polygon(axes.map((a) => a.vertex));
 
   return (
-    <div className="premium-card flex min-h-[380px] flex-col px-6 pb-4 pt-5">
+    <div className="premium-card flex min-h-[380px] flex-col bg-[linear-gradient(160deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_45%,rgba(255,255,255,0.03)_100%)] px-6 pb-4 pt-5 backdrop-blur-2xl ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-20px_40px_rgba(0,0,0,0.42),0_0_0_1px_rgba(212,175,55,0.14),0_14px_36px_rgba(0,0,0,0.5)]">
       <p className="lab mb-1">How you scored across the four profiles</p>
 
       <div className="flex flex-1 items-center justify-center">

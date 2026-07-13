@@ -122,8 +122,9 @@ function PlanCard({
   return (
     <div
       className={clsx(
-        "flex min-h-[520px] flex-col rounded-[28px] border bg-[#050505] p-10 shadow-[0_0_0_1px_rgba(212,175,55,0.08)] sm:min-h-[540px] sm:p-12",
-        offer.recommended ? "border-gold" : "border-line",
+        "flex min-h-[520px] flex-col rounded-[28px] border bg-[linear-gradient(160deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_45%,rgba(255,255,255,0.03)_100%)] p-10 backdrop-blur-2xl ring-1 ring-white/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_0_1px_rgba(228,198,107,0.28),0_20px_44px_rgba(0,0,0,0.58)] sm:min-h-[540px] sm:p-12",
+        "shadow-[inset_0_1px_0_rgba(255,255,255,0.22),inset_0_-20px_40px_rgba(0,0,0,0.42),0_0_0_1px_rgba(212,175,55,0.12),0_12px_34px_rgba(0,0,0,0.5)]",
+        offer.recommended ? "border-gold" : "border-gold/70",
       )}
     >
       <div className="flex items-center justify-between gap-2 border-b border-line pb-6">

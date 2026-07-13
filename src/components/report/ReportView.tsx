@@ -34,7 +34,7 @@ export function ReportView({
     <div className="flex flex-col gap-8 animate-rise sm:gap-10">
       <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch lg:gap-8">
         {/* dominant profile — left */}
-        <div className="premium-card flex min-h-[380px] flex-col">
+        <div className="premium-card flex min-h-[380px] flex-col bg-[linear-gradient(160deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_45%,rgba(255,255,255,0.03)_100%)] backdrop-blur-2xl ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-20px_40px_rgba(0,0,0,0.42),0_0_0_1px_rgba(212,175,55,0.14),0_14px_36px_rgba(0,0,0,0.5)]">
           <p className="lab px-6 pb-1 pt-5">Your dominant profile</p>
           <div className="premium-card-header flex items-center gap-4 px-6 py-5">
             <span className="premium-icon-wrap h-14 w-14 flex-none">
