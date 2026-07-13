@@ -13,6 +13,9 @@ body {
   background: #000000;
   color: #e6e3da;
   -webkit-font-smoothing: antialiased;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-x: clip;
   scrollbar-gutter: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;

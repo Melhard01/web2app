@@ -94,7 +94,7 @@ function ToggleBtn({
 
 function subscribeButtonClass(recommended: boolean, disabled = false) {
   return clsx(
-    "mt-16 mt-auto box-border flex h-14 w-full shrink-0 touch-manipulation items-center justify-center rounded-full border-2 px-6 text-center font-sans text-[16px] font-semibold leading-none transition",
+    "mt-8 mt-auto box-border flex h-11 w-full shrink-0 touch-manipulation items-center justify-center rounded-full border-2 px-5 text-center font-sans text-[14px] font-semibold leading-none transition sm:mt-12 sm:h-12 sm:px-6 sm:text-[15px] lg:mt-16 lg:h-14 lg:text-[16px]",
     disabled
       ? "cursor-not-allowed border-line bg-card text-muted opacity-60"
       : recommended
@@ -122,30 +122,36 @@ function PlanCard({
   return (
     <div
       className={clsx(
-        "flex min-h-[520px] flex-col rounded-[28px] border bg-[linear-gradient(160deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_45%,rgba(255,255,255,0.03)_100%)] p-10 backdrop-blur-2xl ring-1 ring-white/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_0_1px_rgba(228,198,107,0.28),0_20px_44px_rgba(0,0,0,0.58)] sm:min-h-[540px] sm:p-12",
+        "flex min-h-[440px] flex-col rounded-[28px] border bg-[linear-gradient(160deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_45%,rgba(255,255,255,0.03)_100%)] p-6 backdrop-blur-2xl ring-1 ring-white/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_0_1px_rgba(228,198,107,0.28),0_20px_44px_rgba(0,0,0,0.58)] sm:min-h-[500px] sm:p-8 lg:min-h-[540px] lg:p-10",
         "shadow-[inset_0_1px_0_rgba(255,255,255,0.22),inset_0_-20px_40px_rgba(0,0,0,0.42),0_0_0_1px_rgba(212,175,55,0.12),0_12px_34px_rgba(0,0,0,0.5)]",
         offer.recommended ? "border-gold" : "border-gold/70",
       )}
     >
-      <div className="flex items-center justify-between gap-2 border-b border-line pb-6">
-        <span className="font-mono text-[14px] uppercase tracking-label text-gold">
+      <div className="flex flex-col items-start gap-2 border-b border-line pb-4 sm:pb-5 lg:flex-row lg:items-center lg:justify-between lg:gap-3 lg:pb-6">
+        <span className="font-mono text-[12px] uppercase tracking-label text-gold sm:text-[13px] lg:text-[14px]">
           {offer.name}
         </span>
         {offer.recommended && (
-          <span className="rounded-full border border-gold/50 px-2.5 py-1 font-mono text-[10px] uppercase tracking-label text-gold-hi">
+          <span className="inline-flex max-w-full items-center rounded-full border border-gold/50 px-1.5 py-1 font-mono text-[8px] uppercase leading-none tracking-[0.12em] text-gold-hi sm:px-2 sm:text-[9px]">
             Recommended
           </span>
         )}
       </div>
 
-      <p className="border-b border-line py-6 font-mono text-[15px] text-muted">{offer.frequency}</p>
+      <p className="border-b border-line py-4 font-mono text-[13px] text-muted sm:py-5 sm:text-[14px] lg:py-6 lg:text-[15px]">
+        {offer.frequency}
+      </p>
 
-      <div className="border-b border-line py-6">
-        <div className="font-display text-[clamp(34px,4.2vw,42px)] text-white">{price}</div>
+      <div className="border-b border-line py-4 sm:py-5 lg:py-6">
+        <div className="font-display text-[clamp(30px,6.5vw,42px)] text-white">{price}</div>
       </div>
-      <p className="border-b border-line py-6 font-mono text-[15px] text-muted">{unit}</p>
+      <p className="border-b border-line py-4 font-mono text-[13px] text-muted sm:py-5 sm:text-[14px] lg:py-6 lg:text-[15px]">
+        {unit}
+      </p>
 
-      <p className="mt-7 flex-1 text-[17px] leading-[1.55] text-ash">{offer.blurb}</p>
+      <p className="mt-5 flex-1 text-[15px] leading-[1.55] text-ash sm:mt-6 sm:text-[16px] lg:mt-7 lg:text-[17px]">
+        {offer.blurb}
+      </p>
 
       {checkoutHref ? (
         <a

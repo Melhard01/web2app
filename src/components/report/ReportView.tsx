@@ -31,7 +31,7 @@ export function ReportView({
   const Icon = PROFILE_ICONS[profileKey] ?? ScoutIcon;
 
   return (
-    <div className="flex flex-col gap-8 animate-rise sm:gap-10">
+    <div className="mx-auto flex w-full max-w-[360px] flex-col gap-8 animate-rise sm:max-w-[420px] sm:gap-10 lg:max-w-none">
       <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch lg:gap-8">
         {/* dominant profile — left */}
         <div className="premium-card flex min-h-[380px] flex-col bg-[linear-gradient(160deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_45%,rgba(255,255,255,0.03)_100%)] backdrop-blur-2xl ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-20px_40px_rgba(0,0,0,0.42),0_0_0_1px_rgba(212,175,55,0.14),0_14px_36px_rgba(0,0,0,0.5)]">
@@ -74,7 +74,7 @@ export function ReportView({
       </div>
 
       {/* CTA */}
-      <div className="-mt-2">
+      <div className="-mt-2 flex justify-center lg:justify-start">
         <ButtonLink href="/paywall">
           Choose your plan <Arrow />
         </ButtonLink>
