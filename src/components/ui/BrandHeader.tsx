@@ -17,7 +17,7 @@ export function Wordmark({ className }: { className?: string }) {
         alt="EpiMinded"
         width={500}
         height={500}
-        className={clsx("my-[-3rem] h-32 w-auto sm:h-40", className)}
+        className={clsx("my-[-3.5rem] h-40 w-auto sm:my-[-4.5rem] sm:h-52", className)}
         priority
       />
     </Link>
@@ -48,7 +48,7 @@ export function OnboardingStepper({ step }: { step: number }) {
               <span
                 aria-hidden
                 className={clsx(
-                  "h-px w-4 transition-colors sm:w-8",
+                  "h-[2px] w-10 transition-colors sm:w-16",
                   i <= step ? "bg-gold" : "bg-line",
                 )}
               />

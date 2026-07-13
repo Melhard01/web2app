@@ -18,8 +18,8 @@ function productKey(offerId: string, interval: BillingInterval): string {
 
 /**
  * Pricing: three frequency tiers (Lite / Standard / Pro) that share the full
- * feature set — only the booster cadence and price differ. Subscribe CTAs link
- * directly to Polar checkout via /checkout?products=...
+ * feature set — only the booster cadence and price differ. Subscribe CTAs route
+ * through a details step before forwarding to Polar checkout.
  */
 export function PricingPlans({ productIds }: { productIds: ProductIdMap }) {
   const { selectOffer } = useFunnel();
@@ -117,12 +117,12 @@ function PlanCard({
   const isAnnual = interval === "year";
   const price = isAnnual ? offer.annualLabel : offer.monthlyLabel;
   const unit = isAnnual ? "/ year" : "/ user / month";
-  const checkoutHref = productId ? `/checkout?products=${productId}` : undefined;
+  const checkoutHref = productId ? `/pre-checkout?products=${productId}` : undefined;
 
   return (
     <div
       className={clsx(
-        "flex min-h-[520px] flex-col rounded-[28px] border bg-card2 p-10 sm:min-h-[540px] sm:p-12",
+        "flex min-h-[520px] flex-col rounded-[28px] border bg-[#050505] p-10 shadow-[0_0_0_1px_rgba(212,175,55,0.08)] sm:min-h-[540px] sm:p-12",
         offer.recommended ? "border-gold" : "border-line",
       )}
     >

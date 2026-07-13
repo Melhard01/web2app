@@ -30,6 +30,8 @@ export interface FunnelState {
   /** Resolved profile key (set when the report renders). */
   profile: string | null;
   selected: SelectedOffer | null;
+  firstName: string | null;
+  lastName: string | null;
   email: string | null;
   paid: boolean;
   orderRef: string | null;
@@ -39,6 +41,8 @@ const EMPTY: FunnelState = {
   answers: {},
   profile: null,
   selected: null,
+  firstName: null,
+  lastName: null,
   email: null,
   paid: false,
   orderRef: null,
@@ -50,6 +54,7 @@ interface FunnelContextValue extends FunnelState {
   setAnswer: (questionId: string, key: string) => void;
   setProfile: (profile: string) => void;
   selectOffer: (offer: SelectedOffer) => void;
+  setCustomerName: (firstName: string, lastName: string) => void;
   setEmail: (email: string) => void;
   markPaid: (orderRef: string) => void;
   reset: () => void;
@@ -92,6 +97,10 @@ export function FunnelProvider({ children }: { children: React.ReactNode }) {
     setState((s) => ({ ...s, selected }));
   }, []);
 
+  const setCustomerName = useCallback((firstName: string, lastName: string) => {
+    setState((s) => ({ ...s, firstName, lastName }));
+  }, []);
+
   const setEmail = useCallback((email: string) => {
     setState((s) => ({ ...s, email }));
   }, []);
@@ -103,8 +112,17 @@ export function FunnelProvider({ children }: { children: React.ReactNode }) {
   const reset = useCallback(() => setState(EMPTY), []);
 
   const value = useMemo<FunnelContextValue>(
-    () => ({ ...state, setAnswer, setProfile, selectOffer, setEmail, markPaid, reset }),
-    [state, setAnswer, setProfile, selectOffer, setEmail, markPaid, reset],
+    () => ({
+      ...state,
+      setAnswer,
+      setProfile,
+      selectOffer,
+      setCustomerName,
+      setEmail,
+      markPaid,
+      reset,
+    }),
+    [state, setAnswer, setProfile, selectOffer, setCustomerName, setEmail, markPaid, reset],
   );
 
   return <FunnelContext.Provider value={value}>{children}</FunnelContext.Provider>;

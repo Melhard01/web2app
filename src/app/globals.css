@@ -71,13 +71,13 @@ body {
 
   /* Premium glass card — cinematic dark gold aesthetic. */
   .premium-card {
-    @apply relative overflow-hidden rounded-[28px] border border-gold/20 bg-[rgba(10,8,6,0.68)] backdrop-blur-xl;
+    @apply relative overflow-hidden rounded-[28px] border border-gold/60 bg-[#050505];
     box-shadow:
-      inset 0 1px 0 rgba(228, 198, 107, 0.1),
-      inset 0 -24px 48px rgba(0, 0, 0, 0.4),
-      0 0 0 1px rgba(201, 162, 75, 0.05),
-      0 12px 40px rgba(0, 0, 0, 0.5),
-      0 0 56px rgba(201, 162, 75, 0.07);
+      inset 0 1px 0 rgba(228, 198, 107, 0.08),
+      inset 0 -20px 44px rgba(0, 0, 0, 0.42),
+      0 0 0 1px rgba(201, 162, 75, 0.15),
+      0 12px 40px rgba(0, 0, 0, 0.55),
+      0 0 52px rgba(201, 162, 75, 0.08);
   }
 
   .premium-card::before {
@@ -101,7 +101,7 @@ body {
   }
 
   .premium-card-header {
-    @apply border-b border-gold/15 bg-[rgba(201,162,75,0.05)] backdrop-blur-sm;
+    @apply border-b border-gold/25 bg-[rgba(201,162,75,0.04)];
   }
 
   .premium-icon-wrap {

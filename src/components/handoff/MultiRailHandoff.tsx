@@ -40,7 +40,7 @@ export function MultiRailHandoff({ result }: { result: ProvisionResult }) {
       </header>
 
       {/* Activation guide — the mental model before the store actions. */}
-      <section className="rounded-[18px] border border-line bg-card2 p-6">
+      <section className="rounded-[18px] border border-gold/60 bg-[#050505] p-6 shadow-[0_0_0_1px_rgba(212,175,55,0.15)]">
         <p className="lab mb-4">What happens next</p>
         <ol className="flex flex-col gap-4">
           <NextStep
@@ -69,7 +69,7 @@ export function MultiRailHandoff({ result }: { result: ProvisionResult }) {
         Scan or tap to install on your phone
       </p>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2">
         <StoreSection
           icon={<AndroidIcon className="h-5 w-5" />}
           platform={STORES.android.platform}
@@ -130,9 +130,9 @@ function StoreSection({
   cta: string;
 }) {
   return (
-    <section className="flex flex-col items-center gap-4 rounded-[18px] border border-line bg-card2 p-5">
+    <section className="flex min-h-[430px] flex-col items-center gap-4 rounded-[2px] border border-gold/70 bg-[#020202] px-5 pb-5 pt-14 shadow-[0_0_0_1px_rgba(212,175,55,0.18)]">
       <div className="flex items-center gap-2.5">
-        <span className="grid h-9 w-9 flex-none place-items-center rounded-lg border border-line bg-card text-paper">
+        <span className="grid h-9 w-9 flex-none place-items-center rounded-lg border border-gold/30 bg-[#0A0A0A] text-paper">
           {icon}
         </span>
         <span className="font-display text-[20px] font-semibold text-white">
@@ -140,15 +140,15 @@ function StoreSection({
         </span>
       </div>
 
-      <div className="rounded-2xl bg-paper p-3">
-        <QRCode value={url} size={148} />
+      <div className="rounded-[2px] bg-paper p-3">
+        <QRCode value={url} size={160} />
       </div>
 
       <a
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-[12px] bg-gold-cta px-4 py-3 text-[13.5px] font-semibold text-[#15110A] transition hover:bg-gold-hi"
+        className="mt-2 flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-[6px] bg-gold-cta px-4 py-2.5 text-[14px] font-semibold text-[#15110A] transition hover:bg-gold-hi"
       >
         {cta} <Arrow />
       </a>
