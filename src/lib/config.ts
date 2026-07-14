@@ -19,7 +19,74 @@ export const APP = {
 export type BillingInterval = "month" | "year";
 
 /** Single membership, one of three frequency tiers. */
-export const PLAN_NAME = "EpiMinded Membership";
+const SUBSCRIPTION_PLANS_PAYLOAD = {
+  name: "EpiMinded Subscription Plans",
+  description: "Pricing tiers for the EpiMinded cohort platform",
+  features: [
+    "Access to Cohort Community",
+    "Weekly Live Sessions",
+    "Resource Library",
+  ],
+  discount: 0,
+  is_active: true,
+  project: "EpiMinded",
+  subplan: [
+    {
+      name: "LITE",
+      description: "Essential features for getting started",
+      pricing: [
+        {
+          currency: "USD",
+          amount: 19.99,
+          billing_cycle: "month",
+        },
+        {
+          currency: "USD",
+          amount: 199.0,
+          billing_cycle: "year",
+        },
+      ],
+      popular: false,
+    },
+    {
+      name: "Standard",
+      description: "Perfect balance for full cohort participation",
+      pricing: [
+        {
+          currency: "USD",
+          amount: 29.99,
+          billing_cycle: "month",
+        },
+        {
+          currency: "USD",
+          amount: 299.0,
+          billing_cycle: "year",
+        },
+      ],
+      popular: true,
+    },
+    {
+      name: "PRO",
+      description: "Advanced tools, networking, and priority access",
+      pricing: [
+        {
+          currency: "USD",
+          amount: 39.99,
+          billing_cycle: "month",
+        },
+        {
+          currency: "USD",
+          amount: 399.0,
+          billing_cycle: "year",
+        },
+      ],
+      popular: false,
+    },
+  ],
+  index: 0,
+} as const;
+
+export const PLAN_NAME = SUBSCRIPTION_PLANS_PAYLOAD.name;
 
 export interface PlanOffer {
   /** Stable id used across funnel state + entitlement token. */
@@ -36,44 +103,42 @@ export interface PlanOffer {
   blurb: string;
 }
 
+const OFFER_IDS: Array<"lite" | "standard" | "pro"> = ["lite", "standard", "pro"];
+const FREQUENCY_BY_ID: Record<"lite" | "standard" | "pro", string> = {
+  lite: "3 boosters / week",
+  standard: "5 boosters / week",
+  pro: "Daily - 7 / week",
+};
+
+function formatUsd(amount: number) {
+  return `$${amount.toFixed(2)}`;
+}
+
 /**
- * Three tiers — they differ ONLY by booster frequency (every tier ships the
- * full feature set, see SHARED_FEATURES). Prices kept from the prior deck;
- * confirm if they should change now that Community is removed.
+ * Three tiers — values sourced from SUBSCRIPTION_PLANS_PAYLOAD.
+ * Frequency copy remains UI-specific and maps by tier id.
  */
-export const TIERS: PlanOffer[] = [
-  {
-    id: "lite",
-    name: "Lite",
-    frequency: "3 boosters / week",
-    monthlyCents: 1999,
-    annualCents: 19900,
-    monthlyLabel: "$19.99",
-    annualLabel: "$199",
-    blurb: "A steady three-a-week cadence to get started.",
-  },
-  {
-    id: "standard",
-    name: "Standard",
-    frequency: "5 boosters / week",
-    monthlyCents: 2999,
-    annualCents: 29900,
-    monthlyLabel: "$29.99",
-    annualLabel: "$299",
-    recommended: true,
-    blurb: "The habit-forming weekday rhythm — five a week.",
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    frequency: "Daily — 7 / week",
-    monthlyCents: 3999,
-    annualCents: 39900,
-    monthlyLabel: "$39.99",
-    annualLabel: "$399",
-    blurb: "A daily ritual — the high-engagement tier.",
-  },
-];
+export const TIERS: PlanOffer[] = SUBSCRIPTION_PLANS_PAYLOAD.subplan.map((subplan, index) => {
+  const id = OFFER_IDS[index];
+  const monthly = subplan.pricing.find((p) => p.billing_cycle === "month");
+  const annual = subplan.pricing.find((p) => p.billing_cycle === "year");
+
+  if (!id || !monthly || !annual) {
+    throw new Error("Invalid subscription plan payload configuration");
+  }
+
+  return {
+    id,
+    name: subplan.name,
+    frequency: FREQUENCY_BY_ID[id],
+    monthlyCents: Math.round(monthly.amount * 100),
+    annualCents: Math.round(annual.amount * 100),
+    monthlyLabel: formatUsd(monthly.amount),
+    annualLabel: formatUsd(annual.amount),
+    recommended: subplan.popular,
+    blurb: subplan.description,
+  };
+});
 
 export const ALL_OFFERS: PlanOffer[] = TIERS;
 
@@ -82,17 +147,7 @@ export function findOffer(id: string): PlanOffer | undefined {
 }
 
 /** Every tier includes the full feature set. */
-export const SHARED_FEATURES = [
-  "Community access",
-  "Community Brain Boosters",
-  "Personalized Upskilling Brain Boosters (Text · Audio · Podcast)",
-  "360 thinking",
-  "Nearby Peers Recommendation",
-  "Daily Groups",
-  "1-1 Peer discussions (Chat · Video calls)",
-  "Quiz tests",
-  "Weekly progress",
-] as const;
+export const SHARED_FEATURES = SUBSCRIPTION_PLANS_PAYLOAD.features;
 
 /**
  * Optional paid add-on. NOTE: price below is a PLACEHOLDER — set the real

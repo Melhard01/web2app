@@ -18,6 +18,7 @@ type PendingSignup = {
   email: string;
   password: string;
   challengeId?: string | null;
+  registeredUserId?: string | null;
 };
 
 const PENDING_SIGNUP_STORAGE_KEY = "epiminded.pendingSignup.v1";
@@ -33,7 +34,7 @@ export function OTPPageClient() {
   const products = searchParams.get("products") ?? "";
   const offerId = searchParams.get("offerId");
   const interval = searchParams.get("interval");
-  const { setCustomerName, setEmail } = useFunnel();
+  const { setCustomerName, setEmail, setRegisteredAuth } = useFunnel();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [otpCode, setOtpCode] = useState("");
@@ -71,6 +72,8 @@ export function OTPPageClient() {
           email: parsed.email,
           password: parsed.password,
           challengeId: parsed.challengeId ?? null,
+          registeredUserId:
+            typeof parsed.registeredUserId === "string" ? parsed.registeredUserId : null,
         });
       }
     } catch {
@@ -95,6 +98,7 @@ export function OTPPageClient() {
       offerId: offerId ?? null,
       interval: interval ?? null,
       addon: false,
+      userId: pendingSignup.registeredUserId ?? null,
     });
 
     const params = new URLSearchParams();
@@ -142,6 +146,7 @@ export function OTPPageClient() {
         if (normalizedMessage.includes("already verified")) {
           setCustomerName(pendingSignup.firstName, pendingSignup.lastName);
           setEmail(pendingSignup.email);
+          setRegisteredAuth(pendingSignup.registeredUserId ?? null);
           window.location.assign(buildCheckoutUrl);
           return;
         }
@@ -165,6 +170,7 @@ export function OTPPageClient() {
 
       setCustomerName(pendingSignup.firstName, pendingSignup.lastName);
       setEmail(pendingSignup.email);
+      setRegisteredAuth(pendingSignup.registeredUserId ?? null);
       window.location.assign(buildCheckoutUrl);
     } catch {
       setBackendErrors({
@@ -291,13 +297,6 @@ export function OTPPageClient() {
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <button
-              type="submit"
-              className="inline-flex h-10 items-center justify-center rounded-full bg-gold-cta px-5 font-sans text-[14px] font-semibold text-[#15110A] transition hover:bg-gold-hi disabled:cursor-not-allowed disabled:opacity-50 sm:h-12 sm:px-7 sm:text-[16px]"
-              disabled={!hasProduct || !pendingSignup || isSubmitting}
-            >
-              {isSubmitting ? "Please wait..." : "Verify OTP and continue"}
-            </button>
-            <button
               type="button"
               onClick={onResendOtp}
               disabled={!pendingSignup || isSubmitting}
@@ -311,6 +310,13 @@ export function OTPPageClient() {
               className="inline-flex h-10 items-center justify-center rounded-full border border-line bg-card px-4 font-sans text-[14px] font-semibold text-body transition hover:border-gold sm:h-12 sm:px-6 sm:text-[15px]"
             >
               Back to details
+            </button>
+            <button
+              type="submit"
+              className="ml-auto inline-flex h-10 items-center justify-center rounded-full bg-gold-cta px-5 font-sans text-[14px] font-semibold text-[#15110A] transition hover:bg-gold-hi disabled:cursor-not-allowed disabled:opacity-50 sm:h-12 sm:px-7 sm:text-[16px]"
+              disabled={!hasProduct || !pendingSignup || isSubmitting}
+            >
+              {isSubmitting ? "Please wait..." : "Confirm"}
             </button>
           </div>
         </form>

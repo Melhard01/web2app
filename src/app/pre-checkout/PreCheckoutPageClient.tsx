@@ -18,6 +18,7 @@ type AuthApiPayload = {
   message?: string;
   error?: string;
   challengeId?: string;
+  id_user?: string;
 };
 
 const PENDING_SIGNUP_STORAGE_KEY = "epiminded.pendingSignup.v1";
@@ -65,6 +66,7 @@ export function PreCheckoutPageClient() {
     email: storedEmail,
     setCustomerName,
     setEmail,
+    setRegisteredAuth,
   } = useFunnel();
 
   const [firstName, setFirstName] = useState(storedFirstName ?? "");
@@ -175,6 +177,8 @@ export function PreCheckoutPageClient() {
 
     setCustomerName(firstNameClean, lastNameClean);
     setEmail(emailClean);
+    const registeredUserId = typeof payload?.id_user === "string" ? payload.id_user : null;
+    setRegisteredAuth(registeredUserId);
 
     try {
       sessionStorage.setItem(
@@ -186,6 +190,7 @@ export function PreCheckoutPageClient() {
           password,
           challengeId:
             typeof payload?.challengeId === "string" && payload.challengeId ? payload.challengeId : null,
+          registeredUserId,
         }),
       );
     } catch {
@@ -412,18 +417,18 @@ export function PreCheckoutPageClient() {
             </p>
           )}
 
-          <div className="mt-8 flex flex-wrap items-center gap-3">
+          <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:items-center">
             <button
               type="submit"
-              className="inline-flex h-12 items-center justify-center rounded-full bg-gold-cta px-7 font-sans text-[16px] font-semibold text-[#15110A] transition hover:bg-gold-hi disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-10 w-full max-w-[280px] items-center justify-center rounded-full bg-gold-cta px-5 font-sans text-[14px] font-semibold text-[#15110A] transition hover:bg-gold-hi disabled:cursor-not-allowed disabled:opacity-50 sm:order-2 sm:ml-auto sm:h-12 sm:w-auto sm:max-w-none sm:px-7 sm:text-[16px]"
               disabled={!hasProduct || !formValid || isSubmitting}
             >
-              {isSubmitting ? "Please wait..." : "Send OTP"}
+              {isSubmitting ? "Please wait..." : "Send Verification Code"}
             </button>
             <button
               type="button"
               onClick={() => router.push("/paywall")}
-              className="inline-flex h-12 items-center justify-center rounded-full border border-line bg-card px-6 font-sans text-[15px] font-semibold text-body transition hover:border-gold"
+              className="inline-flex h-10 w-full max-w-[280px] items-center justify-center rounded-full border border-line bg-card px-5 font-sans text-[14px] font-semibold text-body transition hover:border-gold sm:order-1 sm:h-12 sm:w-auto sm:max-w-none sm:px-6 sm:text-[15px]"
             >
               Back to plans
             </button>

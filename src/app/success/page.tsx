@@ -11,7 +11,7 @@ function SuccessInner() {
   const searchParams = useSearchParams();
   const checkoutId =
     searchParams.get("checkout_id") || searchParams.get("checkoutId");
-  const { email, selected, markPaid } = useFunnel();
+  const { email, selected, registeredUserId, markPaid } = useFunnel();
   const [result, setResult] = useState<ProvisionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -32,6 +32,7 @@ function SuccessInner() {
         offerId: selected.offerId,
         interval: selected.interval,
         addon: selected.addon,
+        userId: registeredUserId,
       }),
     })
       .then(async (res) => {
@@ -60,7 +61,7 @@ function SuccessInner() {
     return () => {
       cancelled = true;
     };
-  }, [checkoutId, email, selected, markPaid]);
+  }, [checkoutId, email, selected, registeredUserId, markPaid]);
 
   if (result) {
     return <MultiRailHandoff result={result} />;

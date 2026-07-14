@@ -33,6 +33,7 @@ export interface FunnelState {
   firstName: string | null;
   lastName: string | null;
   email: string | null;
+  registeredUserId: string | null;
   paid: boolean;
   orderRef: string | null;
 }
@@ -44,6 +45,7 @@ const EMPTY: FunnelState = {
   firstName: null,
   lastName: null,
   email: null,
+  registeredUserId: null,
   paid: false,
   orderRef: null,
 };
@@ -56,6 +58,7 @@ interface FunnelContextValue extends FunnelState {
   selectOffer: (offer: SelectedOffer) => void;
   setCustomerName: (firstName: string, lastName: string) => void;
   setEmail: (email: string) => void;
+  setRegisteredAuth: (registeredUserId: string | null) => void;
   markPaid: (orderRef: string) => void;
   reset: () => void;
 }
@@ -105,6 +108,10 @@ export function FunnelProvider({ children }: { children: React.ReactNode }) {
     setState((s) => ({ ...s, email }));
   }, []);
 
+  const setRegisteredAuth = useCallback((registeredUserId: string | null) => {
+    setState((s) => ({ ...s, registeredUserId }));
+  }, []);
+
   const markPaid = useCallback((orderRef: string) => {
     setState((s) => ({ ...s, paid: true, orderRef }));
   }, []);
@@ -119,10 +126,21 @@ export function FunnelProvider({ children }: { children: React.ReactNode }) {
       selectOffer,
       setCustomerName,
       setEmail,
+      setRegisteredAuth,
       markPaid,
       reset,
     }),
-    [state, setAnswer, setProfile, selectOffer, setCustomerName, setEmail, markPaid, reset],
+    [
+      state,
+      setAnswer,
+      setProfile,
+      selectOffer,
+      setCustomerName,
+      setEmail,
+      setRegisteredAuth,
+      markPaid,
+      reset,
+    ],
   );
 
   return <FunnelContext.Provider value={value}>{children}</FunnelContext.Provider>;

@@ -12,6 +12,7 @@ export async function POST(req: Request) {
   let offerId: string | undefined;
   let interval: BillingInterval = "month";
   let addon = false;
+  let userId: string | undefined;
 
   try {
     const body = await req.json();
@@ -20,6 +21,7 @@ export async function POST(req: Request) {
     offerId = body?.offerId ? String(body.offerId) : undefined;
     interval = body?.interval === "year" ? "year" : "month";
     addon = Boolean(body?.addon);
+    userId = body?.userId ? String(body.userId) : undefined;
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
@@ -31,6 +33,6 @@ export async function POST(req: Request) {
     );
   }
 
-  const result = await provisionAccount(email, orderRef, offerId, interval, addon);
+  const result = await provisionAccount(email, orderRef, offerId, interval, addon, userId);
   return NextResponse.json(result);
 }
