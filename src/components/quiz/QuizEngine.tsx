@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { QuestionCard } from "./QuestionCard";
 import { Button } from "@/components/ui/Button";
@@ -8,6 +9,7 @@ import { BrandHeader } from "@/components/ui/BrandHeader";
 import { useFunnel } from "@/lib/funnel/store";
 import { QUIZ } from "@/lib/quiz/config";
 import type { QuizOption } from "@/lib/quiz/types";
+import heroTexture from "@/assets/hero-texture.png";
 
 const LOADER_LINES = [
   "Reading your answers",
@@ -123,30 +125,55 @@ export function QuizEngine() {
 
 function Intro({ onBegin }: { onBegin: () => void }) {
   return (
-    <div className="flex min-h-screen flex-col">
-      <BrandHeader step={0} />
-      <main className="mx-auto flex w-full max-w-[640px] flex-1 flex-col justify-center px-[22px] pb-16">
-        <div className="animate-rise text-center">
-          <div className="mb-[18px] flex justify-center">
-            <span className="inline-block rounded-full border border-gold/40 px-5 py-2 font-mono text-[12px] uppercase tracking-eyebrow text-gold">
-              Step 1 · Find your profile
-            </span>
+    <div className="relative isolate flex min-h-screen flex-col overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
+        <div className="absolute inset-0 bg-[#120e06]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_75%_at_18%_12%,rgba(232,186,70,0.55)_0%,rgba(160,110,30,0.22)_38%,transparent_68%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_70%_at_82%_88%,rgba(28,20,8,0.92)_0%,transparent_58%)]" />
+        <Image
+          src={heroTexture}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center opacity-90 mix-blend-soft-light"
+        />
+        <div
+          className="absolute inset-0 opacity-[0.35] mix-blend-overlay"
+          style={{
+            backgroundImage: `url(${heroTexture.src})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.28)_0%,rgba(0,0,0,0.12)_40%,rgba(0,0,0,0.45)_100%)]" />
+      </div>
+
+      <div className="relative z-10 flex min-h-screen flex-col">
+        <BrandHeader step={0} />
+        <main className="mx-auto flex w-full max-w-[640px] flex-1 flex-col justify-center px-[22px] pb-16">
+          <div className="animate-rise text-center">
+            <div className="mb-[18px] flex justify-center">
+              <span className="inline-block rounded-full border border-gold/40 bg-black/25 px-5 py-2 font-mono text-[12px] uppercase tracking-eyebrow text-gold backdrop-blur-sm">
+                Step 1 · Find your profile
+              </span>
+            </div>
+            <h1 className="m-0 mb-[22px] font-display text-[clamp(32px,5.5vw,48px)] font-semibold leading-[1.08] tracking-[-0.01em] text-paper drop-shadow-[0_2px_18px_rgba(0,0,0,0.55)]">
+              Let&apos;s find your{" "}
+              <em className="italic text-gold">strategic profile</em>
+            </h1>
+            <p className="mx-auto m-0 mb-[30px] max-w-[34em] text-[17px] leading-[1.6] text-ash drop-shadow-[0_1px_12px_rgba(0,0,0,0.45)]">
+              Seven quick questions on how you read change, make the call, and stay
+              ahead. We&apos;ll map the profile that defines how you operate, the blind
+              spot holding you back, and the cohort that would sharpen you.
+            </p>
+            <Button onClick={onBegin}>Begin →</Button>
+            <p className="mt-[26px] font-mono text-[12px] tracking-[0.04em] text-muted">
+              about 2 minutes · your answers shape your plan
+            </p>
           </div>
-          <h1 className="m-0 mb-[22px] font-display text-[clamp(32px,5.5vw,48px)] font-semibold leading-[1.08] tracking-[-0.01em] text-paper">
-            Let&apos;s find your{" "}
-            <em className="italic text-gold">strategic profile</em>
-          </h1>
-          <p className="mx-auto m-0 mb-[30px] max-w-[34em] text-[17px] leading-[1.6] text-ash">
-            Seven quick questions on how you read change, make the call, and stay
-            ahead. We&apos;ll map the profile that defines how you operate, the blind
-            spot holding you back, and the cohort that would sharpen you.
-          </p>
-          <Button onClick={onBegin}>Begin →</Button>
-          <p className="mt-[26px] font-mono text-[12px] tracking-[0.04em] text-muted">
-            about 2 minutes · your answers shape your plan
-          </p>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

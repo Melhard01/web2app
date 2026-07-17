@@ -53,27 +53,58 @@ body {
     @apply font-mono text-[11px] uppercase tracking-label text-muted;
   }
 
-  /* Quiz / choice option button. */
+  /* Quiz / choice option button — glassmorphism cards. */
   .opt {
-    @apply flex w-full items-start gap-3.5 rounded-[13px] border border-line bg-card px-[17px] py-4 text-left text-base leading-snug text-body transition;
+    @apply flex w-full items-start gap-3.5 rounded-[13px] border border-gold/70 px-[17px] py-4 text-left text-base leading-snug text-body backdrop-blur-2xl ring-1 ring-white/10 transition;
+    background: linear-gradient(
+      160deg,
+      rgba(255, 255, 255, 0.14) 0%,
+      rgba(255, 255, 255, 0.06) 45%,
+      rgba(255, 255, 255, 0.03) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      inset 0 -20px 40px rgba(0, 0, 0, 0.42),
+      0 0 0 1px rgba(212, 175, 55, 0.14),
+      0 14px 36px rgba(0, 0, 0, 0.5);
   }
   .opt:hover {
     border-color: #c9a24b;
-    background: rgba(201, 162, 75, 0.09);
+    background: linear-gradient(
+      160deg,
+      rgba(201, 162, 75, 0.22) 0%,
+      rgba(201, 162, 75, 0.1) 45%,
+      rgba(255, 255, 255, 0.04) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      inset 0 -20px 40px rgba(0, 0, 0, 0.42),
+      0 0 0 1px rgba(228, 198, 107, 0.28),
+      0 16px 40px rgba(0, 0, 0, 0.55);
   }
   .opt.sel {
-    border-color: #2a261f;
-    background: #120f0d;
+    border-color: rgba(201, 162, 75, 0.45);
+    background: linear-gradient(
+      160deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.04) 45%,
+      rgba(255, 255, 255, 0.02) 100%
+    );
   }
   .opt.sel:hover {
     border-color: #c9a24b;
-    background: rgba(201, 162, 75, 0.09);
+    background: linear-gradient(
+      160deg,
+      rgba(201, 162, 75, 0.22) 0%,
+      rgba(201, 162, 75, 0.1) 45%,
+      rgba(255, 255, 255, 0.04) 100%
+    );
   }
   .opt .ltr {
-    @apply mt-px flex h-6 w-6 flex-none items-center justify-center rounded-md border border-line bg-[#100E0B] font-mono text-[12px] text-muted;
+    @apply mt-px flex h-6 w-6 flex-none items-center justify-center rounded-md border border-white/15 bg-white/5 font-mono text-[12px] text-muted backdrop-blur-sm;
   }
   .opt.sel .ltr {
-    @apply border-line bg-[#100E0B] text-muted;
+    @apply border-white/15 bg-white/5 text-muted;
   }
 
   /* Premium glass card — cinematic dark gold aesthetic. */
