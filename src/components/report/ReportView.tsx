@@ -70,7 +70,7 @@ export function ReportView({
       </div>
 
       {/* CTA */}
-      <div className="-mt-2 flex justify-end">
+      <div className="-mt-2 flex justify-center lg:justify-start">
         <ButtonLink href="/paywall">
           Choose your plan <Arrow />
         </ButtonLink>

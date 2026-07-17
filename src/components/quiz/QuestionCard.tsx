@@ -33,7 +33,7 @@ export function QuestionCard({
           {text}
         </p>
       ) : null}
-      <div className="eq-options-list">
+      <div className="eq-options-list flex flex-col gap-3.5">
         {options.map((o, i) => (
           <button
             key={o.key}
