@@ -28,7 +28,6 @@ export async function POST(req: Request) {
   const lastName = typeof payload.lastName === "string" ? payload.lastName : "";
   const email = typeof payload.email === "string" ? payload.email : "";
   const password = typeof payload.password === "string" ? payload.password : "";
-
   if (!firstName || !lastName || !email || !password) {
     return NextResponse.json(
       {

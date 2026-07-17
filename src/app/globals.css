@@ -58,10 +58,14 @@ body {
     @apply flex w-full items-start gap-3.5 rounded-[13px] border border-line bg-card px-[17px] py-4 text-left text-base leading-snug text-body transition;
   }
   .opt:hover {
-    border-color: #4a4030;
-    background: #1b1712;
+    border-color: #c9a24b;
+    background: rgba(201, 162, 75, 0.09);
   }
   .opt.sel {
+    border-color: #2a261f;
+    background: #120f0d;
+  }
+  .opt.sel:hover {
     border-color: #c9a24b;
     background: rgba(201, 162, 75, 0.09);
   }
@@ -69,7 +73,7 @@ body {
     @apply mt-px flex h-6 w-6 flex-none items-center justify-center rounded-md border border-line bg-[#100E0B] font-mono text-[12px] text-muted;
   }
   .opt.sel .ltr {
-    @apply border-gold bg-gold text-[#15110A];
+    @apply border-line bg-[#100E0B] text-muted;
   }
 
   /* Premium glass card — cinematic dark gold aesthetic. */

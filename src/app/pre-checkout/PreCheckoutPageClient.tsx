@@ -72,6 +72,7 @@ export function PreCheckoutPageClient() {
   const [firstName, setFirstName] = useState(storedFirstName ?? "");
   const [lastName, setLastName] = useState(storedLastName ?? "");
   const [email, updateEmail] = useState(storedEmail ?? "");
+  const [communityId, setCommunityId] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -156,6 +157,7 @@ export function PreCheckoutPageClient() {
   };
 
   const handleRegisterAndSendOtp = async () => {
+    const communityIdClean = communityId.trim();
     const response = await fetch("/api/auth/register", {
       method: "POST",
       headers: {
@@ -180,6 +182,37 @@ export function PreCheckoutPageClient() {
     const registeredUserId = typeof payload?.id_user === "string" ? payload.id_user : null;
     setRegisteredAuth(registeredUserId);
 
+    if (communityIdClean && registeredUserId) {
+      try {
+        const joinCommunityResponse = await fetch("/api/auth/join-community-by-code", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: registeredUserId,
+            code: communityIdClean,
+          }),
+        });
+
+        if (!joinCommunityResponse.ok) {
+          const joinCommunityPayload = (await joinCommunityResponse.json().catch(() => null)) as
+            | AuthApiPayload
+            | null;
+          console.error("[Community Join] Request failed", {
+            status: joinCommunityResponse.status,
+            userId: registeredUserId,
+            message: joinCommunityPayload?.message || joinCommunityPayload?.error || null,
+          });
+        }
+      } catch (error) {
+        console.error("[Community Join] Request error", {
+          userId: registeredUserId,
+          error,
+        });
+      }
+    }
+
     try {
       sessionStorage.setItem(
         PENDING_SIGNUP_STORAGE_KEY,
@@ -188,6 +221,7 @@ export function PreCheckoutPageClient() {
           lastName: lastNameClean,
           email: emailClean,
           password,
+          communityId: communityIdClean || null,
           challengeId:
             typeof payload?.challengeId === "string" && payload.challengeId ? payload.challengeId : null,
           registeredUserId,
@@ -307,6 +341,8 @@ export function PreCheckoutPageClient() {
             </label>
           </div>
 
+          <div className="mt-5 border-t border-gold/10" />
+
           <label className="mt-5 block">
             <span className="mb-2 block font-mono text-[12px] uppercase tracking-label text-muted">
               Email
@@ -332,6 +368,31 @@ export function PreCheckoutPageClient() {
               <span className="mt-2 block text-sm text-[#f0bbbb]">{backendFieldErrors.email}</span>
             )}
           </label>
+
+          <div className="mt-5 border-t border-gold/10" />
+
+          <label className="mt-5 block">
+            <span className="mb-2 block font-mono text-[12px] uppercase tracking-label text-muted">
+              COMMUNITY ID (OPTIONAL)
+            </span>
+            <p className="mb-2 text-sm leading-[1.5] text-ash">
+              Optional: Enter your Community ID if one was provided to you. This helps us
+              associate your account with the correct community before you use the app.
+            </p>
+            <input
+              type="text"
+              autoComplete="off"
+              value={communityId}
+              onChange={(e) => setCommunityId(e.target.value)}
+              className="w-full rounded-xl border border-line bg-card px-4 py-3 text-[16px] text-body outline-none transition focus:border-gold"
+              placeholder="Enter your Community ID"
+            />
+            <p className="mt-2 text-sm leading-[1.5] text-muted">
+              Optional on the web. Request before using the mobile app.
+            </p>
+          </label>
+
+          <div className="mt-5 border-t border-gold/10" />
 
           <label className="mt-5 block">
             <span className="mb-2 block font-mono text-[12px] uppercase tracking-label text-muted">

@@ -17,6 +17,7 @@ type PendingSignup = {
   lastName: string;
   email: string;
   password: string;
+  communityId?: string | null;
   challengeId?: string | null;
   registeredUserId?: string | null;
 };
@@ -46,10 +47,12 @@ export function OTPPageClient() {
     otp?: string;
     general?: string;
   }>({});
+  const [showCommunityIdNotice, setShowCommunityIdNotice] = useState(false);
   const [pendingSignup, setPendingSignup] = useState<PendingSignup | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    let communityIdNoticeTimer: ReturnType<typeof setTimeout> | null = null;
     try {
       const raw = sessionStorage.getItem(PENDING_SIGNUP_STORAGE_KEY);
       if (!raw) {
@@ -66,15 +69,27 @@ export function OTPPageClient() {
           general: "Signup session is incomplete. Please fill your details again.",
         });
       } else {
+        setOtpInfoMessage(
+          `We sent a verification code to ${parsed.email}. Enter it to continue.`,
+        );
         setPendingSignup({
           firstName: parsed.firstName,
           lastName: parsed.lastName,
           email: parsed.email,
           password: parsed.password,
+          communityId: typeof parsed.communityId === "string" ? parsed.communityId.trim() : null,
           challengeId: parsed.challengeId ?? null,
           registeredUserId:
             typeof parsed.registeredUserId === "string" ? parsed.registeredUserId : null,
         });
+        const hasCommunityId =
+          typeof parsed.communityId === "string" && parsed.communityId.trim().length > 0;
+        if (!hasCommunityId) {
+          setShowCommunityIdNotice(true);
+          communityIdNoticeTimer = setTimeout(() => {
+            setShowCommunityIdNotice(false);
+          }, 20000);
+        }
       }
     } catch {
       setBackendErrors({
@@ -83,6 +98,9 @@ export function OTPPageClient() {
     } finally {
       setHydrated(true);
     }
+    return () => {
+      if (communityIdNoticeTimer) clearTimeout(communityIdNoticeTimer);
+    };
   }, []);
 
   const otpClean = otpCode.trim();
@@ -245,6 +263,12 @@ export function OTPPageClient() {
           Enter your verification code
         </h1>
         <p className="m-0 mb-10 max-w-[38em] text-[17px] leading-[1.6] text-ash">{otpInfoMessage}</p>
+        {showCommunityIdNotice && (
+          <p className="mb-6 rounded-xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm text-gold-hi">
+            You skipped the community code. You can continue creating your account, but you&apos;ll
+            need to add a valid community code before accessing the mobile app.
+          </p>
+        )}
 
         <form
           onSubmit={onVerifyOtp}

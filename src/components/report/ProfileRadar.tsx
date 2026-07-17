@@ -32,10 +32,12 @@ export function ProfileRadar({
   scores,
   maxScore,
   activeKey,
+  embedded = false,
 }: {
   scores: Record<string, number>;
   maxScore: number;
   activeKey: string;
+  embedded?: boolean;
 }) {
   const keys = Object.keys(QUIZ.profiles);
   const n = keys.length;
@@ -59,7 +61,13 @@ export function ProfileRadar({
   const dataPolygon = polygon(axes.map((a) => a.vertex));
 
   return (
-    <div className="premium-card flex min-h-[380px] flex-col bg-[linear-gradient(160deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_45%,rgba(255,255,255,0.03)_100%)] px-6 pb-4 pt-5 backdrop-blur-2xl ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-20px_40px_rgba(0,0,0,0.42),0_0_0_1px_rgba(212,175,55,0.14),0_14px_36px_rgba(0,0,0,0.5)]">
+    <div
+      className={
+        embedded
+          ? "flex min-h-[340px] flex-col px-6 pb-5 pt-4"
+          : "premium-card flex min-h-[380px] flex-col bg-[linear-gradient(160deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_45%,rgba(255,255,255,0.03)_100%)] px-6 pb-4 pt-5 backdrop-blur-2xl ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-20px_40px_rgba(0,0,0,0.42),0_0_0_1px_rgba(212,175,55,0.14),0_14px_36px_rgba(0,0,0,0.5)]"
+      }
+    >
       <p className="lab mb-1">How you scored across the four profiles</p>
 
       <div className="flex flex-1 items-center justify-center">
@@ -69,7 +77,7 @@ export function ProfileRadar({
           aria-label={`Radar chart of your strategic profile scores. Dominant: ${
             QUIZ.profiles[activeKey]?.name ?? activeKey
           }.`}
-          className="mx-auto block h-full w-full max-h-[280px] max-w-[340px]"
+          className="mx-auto block h-full w-full max-h-[340px] max-w-[420px]"
         >
         {/* concentric grid rings */}
         {Array.from({ length: RINGS }, (_, level) => {
@@ -106,7 +114,7 @@ export function ProfileRadar({
           points={dataPolygon}
           fill="rgba(201,162,75,0.16)"
           stroke={GOLD}
-          strokeWidth={1.8}
+          strokeWidth={1}
           strokeLinejoin="round"
         />
 
@@ -139,17 +147,19 @@ export function ProfileRadar({
               <tspan
                 x={lx}
                 dy="-0.3em"
-                fontSize="12.5"
-                fontWeight={a.active ? 700 : 500}
+                fontSize="11"
+                fontWeight={500}
+                letterSpacing="2.1"
                 fill={a.active ? GOLD_HI : MUTED}
               >
-                {a.name}
+                {a.name.toUpperCase()}
               </tspan>
               <tspan
                 x={lx}
                 dy="1.35em"
-                fontSize="10.5"
+                fontSize="11"
                 fontWeight={500}
+                letterSpacing="1.6"
                 fill={a.active ? GOLD : MUTED}
               >
                 {a.value}/{safeMax}
