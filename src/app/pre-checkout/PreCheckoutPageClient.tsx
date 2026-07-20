@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BrandHeader } from "@/components/ui/BrandHeader";
 import { useFunnel } from "@/lib/funnel/store";
@@ -12,6 +12,8 @@ import {
   validateLastName,
   validatePassword,
 } from "@/lib/validation/signup";
+
+const COMMUNITY_ID_STORAGE_KEY = "epiminded.communityId.v1";
 
 type AuthApiPayload = {
   code?: string;
@@ -84,6 +86,26 @@ export function PreCheckoutPageClient() {
   const [emailTouched, setEmailTouched] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false);
+
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem(COMMUNITY_ID_STORAGE_KEY);
+      const cleaned = typeof stored === "string" ? stored.trim() : "";
+      if (!cleaned) {
+        const params = new URLSearchParams();
+        if (products) params.set("products", products);
+        const query = params.toString();
+        router.replace(query ? `/pre-checkout/community?${query}` : "/pre-checkout/community");
+        return;
+      }
+      setCommunityId(cleaned);
+    } catch {
+      const params = new URLSearchParams();
+      if (products) params.set("products", products);
+      const query = params.toString();
+      router.replace(query ? `/pre-checkout/community?${query}` : "/pre-checkout/community");
+    }
+  }, [products, router]);
   const [backendFieldErrors, setBackendFieldErrors] = useState<{
     firstName?: string;
     lastName?: string;
@@ -373,29 +395,6 @@ export function PreCheckoutPageClient() {
 
           <label className="mt-5 block">
             <span className="mb-2 block font-mono text-[12px] uppercase tracking-label text-muted">
-              COMMUNITY ID (OPTIONAL)
-            </span>
-            <p className="mb-2 text-sm leading-[1.5] text-ash">
-              Optional: Enter your Community ID if one was provided to you. This helps us
-              associate your account with the correct community before you use the app.
-            </p>
-            <input
-              type="text"
-              autoComplete="off"
-              value={communityId}
-              onChange={(e) => setCommunityId(e.target.value)}
-              className="w-full rounded-xl border border-line bg-card px-4 py-3 text-[16px] text-body outline-none transition focus:border-gold"
-              placeholder="Enter your Community ID"
-            />
-            <p className="mt-2 text-sm leading-[1.5] text-muted">
-              Optional on the web. Request before using the mobile app.
-            </p>
-          </label>
-
-          <div className="mt-5 border-t border-gold/10" />
-
-          <label className="mt-5 block">
-            <span className="mb-2 block font-mono text-[12px] uppercase tracking-label text-muted">
               Password
             </span>
             <div className="relative">
@@ -488,10 +487,15 @@ export function PreCheckoutPageClient() {
             </button>
             <button
               type="button"
-              onClick={() => router.push("/paywall")}
+              onClick={() => {
+                const params = new URLSearchParams();
+                if (products) params.set("products", products);
+                const query = params.toString();
+                router.push(query ? `/pre-checkout/community?${query}` : "/pre-checkout/community");
+              }}
               className="inline-flex h-10 w-full max-w-[280px] items-center justify-center rounded-full border border-line bg-card px-5 font-sans text-[14px] font-semibold text-body transition hover:border-gold sm:order-1 sm:h-12 sm:w-auto sm:max-w-none sm:px-6 sm:text-[15px]"
             >
-              Back to plans
+              Back
             </button>
           </div>
         </form>

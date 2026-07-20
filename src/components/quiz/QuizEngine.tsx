@@ -125,8 +125,9 @@ export function QuizEngine() {
 
 function Intro({ onBegin }: { onBegin: () => void }) {
   return (
-    <div className="relative isolate flex min-h-screen flex-col overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
+    <div className="relative flex min-h-screen flex-col">
+      {/* Background stays at z-0 (not negative) so it remains visible above the page canvas. */}
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden>
         <div className="absolute inset-0 bg-[#120e06]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_75%_at_18%_12%,rgba(232,186,70,0.55)_0%,rgba(160,110,30,0.22)_38%,transparent_68%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_70%_at_82%_88%,rgba(28,20,8,0.92)_0%,transparent_58%)]" />
@@ -149,6 +150,7 @@ function Intro({ onBegin }: { onBegin: () => void }) {
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.28)_0%,rgba(0,0,0,0.12)_40%,rgba(0,0,0,0.45)_100%)]" />
       </div>
 
+      {/* Header + content above the background; no overflow on this wrapper so sticky works. */}
       <div className="relative z-10 flex min-h-screen flex-col">
         <BrandHeader step={0} />
         <main className="mx-auto flex w-full max-w-[640px] flex-1 flex-col justify-center px-[22px] pb-16">

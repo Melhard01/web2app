@@ -1,4 +1,6 @@
-import { Fragment } from "react";
+"use client";
+
+import { Fragment, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { clsx } from "@/lib/clsx";
@@ -32,7 +34,7 @@ const NAV = [
 
 export const ONBOARDING_STEPS = ["Profile", "Plan", "Open app"] as const;
 
-/** Onboarding progress — rendered below the navbar, not inside it. */
+/** Onboarding progress — rendered below the navbar, not inside the navbar. */
 export function OnboardingStepper({ step }: { step: number }) {
   return (
     <nav
@@ -87,20 +89,72 @@ export function OnboardingStepper({ step }: { step: number }) {
   );
 }
 
+function readScrollTop() {
+  if (typeof window === "undefined") return 0;
+  return (
+    window.scrollY ||
+    window.pageYOffset ||
+    document.documentElement.scrollTop ||
+    document.body.scrollTop ||
+    0
+  );
+}
+
 /**
  * Top navbar with logo. Optional `step` renders the onboarding stepper
  * below the bar — not inside the navbar.
+ *
+ * Sticky on every page: solid while scrolled, transparent again when you
+ * scroll back to the top of the page.
  */
 export function BrandHeader({
   full = false,
   step,
+  sticky = true,
 }: {
   full?: boolean;
   step?: number;
+  sticky?: boolean;
 }) {
+  const [atTop, setAtTop] = useState(true);
+
+  useEffect(() => {
+    if (!sticky) {
+      setAtTop(true);
+      return;
+    }
+
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      setAtTop(readScrollTop() <= 12);
+    };
+    const onScrollOrResize = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", onScrollOrResize, { passive: true });
+    window.addEventListener("resize", onScrollOrResize, { passive: true });
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScrollOrResize);
+      window.removeEventListener("resize", onScrollOrResize);
+    };
+  }, [sticky]);
+
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-line/50 bg-[rgba(0,0,0,0.88)] backdrop-blur-md">
+      <header
+        className={clsx(
+          "z-50 w-full transition-[background-color,border-color,backdrop-filter,box-shadow] duration-300",
+          sticky ? "sticky top-0" : "relative",
+          atTop
+            ? "border-b border-transparent bg-transparent shadow-none backdrop-blur-none"
+            : "border-b border-line/50 bg-[rgba(0,0,0,0.88)] shadow-[0_8px_24px_rgba(0,0,0,0.35)] backdrop-blur-md",
+        )}
+      >
         <div
           className={clsx(
             "mx-auto flex w-full max-w-[1180px] items-center px-6 py-0",

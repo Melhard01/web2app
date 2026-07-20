@@ -6,7 +6,12 @@
  * this self-serve web funnel. Prices are taken from the deck as-is (they include
  * the store-fee buffer); the web simply collects payment fee-free and the
  * entitlement carries into the app.
+ *
+ * PlanOffer cents are mobile/store base prices. Web display discounts are
+ * applied via `@/lib/pricing` (WEB_DISCOUNT_PERCENT).
  */
+
+import { formatUsd } from "@/lib/pricing";
 
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -18,7 +23,31 @@ export const APP = {
 
 export type BillingInterval = "month" | "year";
 
-/** Single membership, one of three frequency tiers. */
+export type OfferId = "lite" | "standard" | "pro";
+
+export type WebPlanPricing = {
+  currency?: string;
+  amount?: number;
+  billing_cycle?: string;
+};
+
+export type WebPlanSubplan = {
+  name?: string;
+  description?: string;
+  pricing?: readonly WebPlanPricing[];
+  popular?: boolean;
+};
+
+export type WebPlansApiResponse = {
+  plan?: {
+    name?: string;
+    description?: string;
+    features?: readonly string[];
+    subplan?: readonly WebPlanSubplan[];
+  };
+};
+
+/** Single membership, one of three frequency tiers — static fallback. */
 const SUBSCRIPTION_PLANS_PAYLOAD = {
   name: "EpiMinded Subscription Plans",
   description: "Pricing tiers for the EpiMinded cohort platform",
@@ -96,7 +125,7 @@ export const PLAN_NAME = SUBSCRIPTION_PLANS_PAYLOAD.name;
 
 export interface PlanOffer {
   /** Stable id used across funnel state + entitlement token. */
-  id: "lite" | "standard" | "pro";
+  id: OfferId;
   /** Tier display name. */
   name: string;
   /** Booster cadence. */
@@ -109,42 +138,79 @@ export interface PlanOffer {
   blurb: string;
 }
 
-const OFFER_IDS: Array<"lite" | "standard" | "pro"> = ["lite", "standard", "pro"];
-const FREQUENCY_BY_ID: Record<"lite" | "standard" | "pro", string> = {
+const FREQUENCY_BY_ID: Record<OfferId, string> = {
   lite: "3 boosters / week",
   standard: "5 boosters / week",
   pro: "Daily - 7 / week",
 };
 
-function formatUsd(amount: number) {
-  return `$${amount.toFixed(2)}`;
+function offerIdFromName(name: string | undefined): OfferId | null {
+  const normalized = (name || "").trim().toLowerCase();
+  if (normalized === "lite") return "lite";
+  if (normalized === "standard") return "standard";
+  if (normalized === "pro") return "pro";
+  return null;
 }
 
-/**
- * Three tiers — values sourced from SUBSCRIPTION_PLANS_PAYLOAD.
- * Frequency copy remains UI-specific and maps by tier id.
- */
-export const TIERS: PlanOffer[] = SUBSCRIPTION_PLANS_PAYLOAD.subplan.map((subplan, index) => {
-  const id = OFFER_IDS[index];
-  const monthly = subplan.pricing.find((p) => p.billing_cycle === "month");
-  const annual = subplan.pricing.find((p) => p.billing_cycle === "year");
+function mapSubplanToOffer(subplan: WebPlanSubplan): PlanOffer | null {
+  const id = offerIdFromName(subplan.name);
+  if (!id) return null;
 
-  if (!id || !monthly || !annual) {
-    throw new Error("Invalid subscription plan payload configuration");
+  const pricing = Array.isArray(subplan.pricing) ? subplan.pricing : [];
+  const monthly = pricing.find((p) => p.billing_cycle === "month");
+  const annual = pricing.find((p) => p.billing_cycle === "year");
+  if (typeof monthly?.amount !== "number" || typeof annual?.amount !== "number") {
+    return null;
   }
 
   return {
     id,
-    name: subplan.name,
+    name: typeof subplan.name === "string" && subplan.name.trim() ? subplan.name.trim() : id,
     frequency: FREQUENCY_BY_ID[id],
     monthlyCents: Math.round(monthly.amount * 100),
     annualCents: Math.round(annual.amount * 100),
     monthlyLabel: formatUsd(monthly.amount),
     annualLabel: formatUsd(annual.amount),
-    recommended: subplan.popular,
-    blurb: subplan.description,
+    recommended: Boolean(subplan.popular),
+    blurb:
+      typeof subplan.description === "string" && subplan.description.trim()
+        ? subplan.description.trim()
+        : "",
   };
-});
+}
+
+/**
+ * Map GET /plans/web payload into paywall tiers + features.
+ * Returns null when the payload cannot produce a usable tier list.
+ */
+export function mapWebPlansPayload(
+  payload: WebPlansApiResponse,
+): { tiers: PlanOffer[]; features: string[] } | null {
+  const subplans = payload.plan?.subplan;
+  if (!Array.isArray(subplans) || subplans.length === 0) return null;
+
+  const tiers = subplans
+    .map(mapSubplanToOffer)
+    .filter((tier): tier is PlanOffer => tier !== null);
+
+  if (tiers.length === 0) return null;
+
+  const order: OfferId[] = ["lite", "standard", "pro"];
+  tiers.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
+
+  return {
+    tiers,
+    // Feature list is owned by the web UI (SHARED_FEATURES), not the plans API.
+    features: [...SUBSCRIPTION_PLANS_PAYLOAD.features],
+  };
+}
+
+/**
+ * Three tiers — static fallback from SUBSCRIPTION_PLANS_PAYLOAD.
+ * Frequency copy remains UI-specific and maps by tier id.
+ */
+export const TIERS: PlanOffer[] =
+  mapWebPlansPayload({ plan: SUBSCRIPTION_PLANS_PAYLOAD })?.tiers ?? [];
 
 export const ALL_OFFERS: PlanOffer[] = TIERS;
 
@@ -152,8 +218,8 @@ export function findOffer(id: string): PlanOffer | undefined {
   return ALL_OFFERS.find((o) => o.id === id);
 }
 
-/** Every tier includes the full feature set. */
-export const SHARED_FEATURES = SUBSCRIPTION_PLANS_PAYLOAD.features;
+/** Every tier includes the full feature set (static fallback). */
+export const SHARED_FEATURES = [...SUBSCRIPTION_PLANS_PAYLOAD.features];
 
 /**
  * Optional paid add-on. NOTE: price below is a PLACEHOLDER — set the real

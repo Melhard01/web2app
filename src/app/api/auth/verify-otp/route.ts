@@ -43,6 +43,7 @@ export async function POST(req: Request) {
   }
 
   try {
+    // Auth API VerifyEmailRequest expects { email, verificationCode }.
     const requestInit: RequestInit = {
       method: "POST",
       headers: {
@@ -50,7 +51,7 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify({
         email,
-        otp,
+        verificationCode: otp,
         ...(challengeId ? { challengeId } : {}),
       }),
       cache: "no-store",
@@ -59,7 +60,14 @@ export async function POST(req: Request) {
     let response = await fetch(getVerifyOtpUrl(), requestInit);
     // Backward-compatible retry for environments still exposing /verify-otp.
     if (response.status === 404 && !process.env.AUTH_VERIFY_OTP_URL?.trim()) {
-      response = await fetch(getLegacyVerifyOtpUrl(), requestInit);
+      response = await fetch(getLegacyVerifyOtpUrl(), {
+        ...requestInit,
+        body: JSON.stringify({
+          email,
+          otp,
+          ...(challengeId ? { challengeId } : {}),
+        }),
+      });
     }
 
     const contentType = response.headers.get("content-type") || "";
@@ -68,6 +76,23 @@ export async function POST(req: Request) {
       : {
           message: await response.text(),
         };
+
+    // Normalize FastAPI `detail` into message for the frontend.
+    if (
+      payloadFromAuth &&
+      typeof payloadFromAuth === "object" &&
+      !Array.isArray(payloadFromAuth) &&
+      typeof (payloadFromAuth as { detail?: unknown }).detail === "string" &&
+      !(payloadFromAuth as { message?: unknown }).message
+    ) {
+      return NextResponse.json(
+        {
+          ...(payloadFromAuth as Record<string, unknown>),
+          message: (payloadFromAuth as { detail: string }).detail,
+        },
+        { status: response.status },
+      );
+    }
 
     return NextResponse.json(payloadFromAuth, { status: response.status });
   } catch {

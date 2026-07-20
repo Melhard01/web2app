@@ -9,6 +9,10 @@ import {
   type BillingInterval,
   type PlanOffer,
 } from "@/lib/config";
+import {
+  resolvePlanPrice,
+  type PricingPlatform,
+} from "@/lib/pricing";
 
 export type ProductIdMap = Record<string, string | undefined>;
 
@@ -20,8 +24,20 @@ function productKey(offerId: string, interval: BillingInterval): string {
  * Pricing: three frequency tiers (Lite / Standard / Pro) that share the full
  * feature set — only the booster cadence and price differ. Subscribe CTAs route
  * through a details step before forwarding to Polar checkout.
+ *
+ * PlanOffer cents are mobile/base prices. Web display applies WEB_DISCOUNT_PERCENT.
  */
-export function PricingPlans({ productIds }: { productIds: ProductIdMap }) {
+export function PricingPlans({
+  productIds,
+  tiers = TIERS,
+  features = SHARED_FEATURES,
+  platform = "web",
+}: {
+  productIds: ProductIdMap;
+  tiers?: PlanOffer[];
+  features?: string[];
+  platform?: PricingPlatform;
+}) {
   const { selectOffer } = useFunnel();
   const [interval, setInterval] = useState<BillingInterval>("month");
 
@@ -43,11 +59,12 @@ export function PricingPlans({ productIds }: { productIds: ProductIdMap }) {
 
       {/* tier cards */}
       <div className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-3 md:gap-8">
-        {TIERS.map((tier) => (
+        {tiers.map((tier) => (
           <PlanCard
             key={tier.id}
             offer={tier}
             interval={interval}
+            platform={platform}
             productId={productIds[productKey(tier.id, interval)]}
             onChoose={choose}
           />
@@ -58,7 +75,7 @@ export function PricingPlans({ productIds }: { productIds: ProductIdMap }) {
       <div className="mt-10">
         <p className="lab mb-4">Every tier includes</p>
         <ul className="grid gap-2.5 sm:grid-cols-2">
-          {SHARED_FEATURES.map((f) => (
+          {features.map((f) => (
             <li key={f} className="flex items-start gap-3 text-[14.5px] text-body">
               <span className="mt-[7px] h-1.5 w-1.5 flex-none rounded-full bg-gold" />
               {f}
@@ -106,18 +123,23 @@ function subscribeButtonClass(recommended: boolean, disabled = false) {
 function PlanCard({
   offer,
   interval,
+  platform,
   productId,
   onChoose,
 }: {
   offer: PlanOffer;
   interval: BillingInterval;
+  platform: PricingPlatform;
   productId: string | undefined;
   onChoose: (offer: PlanOffer) => void;
 }) {
   const isAnnual = interval === "year";
-  const price = isAnnual ? offer.annualLabel : offer.monthlyLabel;
+  const mobileCents = isAnnual ? offer.annualCents : offer.monthlyCents;
+  const price = resolvePlanPrice(mobileCents, platform);
   const unit = isAnnual ? "/ year" : "/ user / month";
-  const checkoutHref = productId ? `/pre-checkout?products=${productId}` : undefined;
+  const checkoutHref = productId
+    ? `/pre-checkout/community?products=${productId}`
+    : undefined;
 
   return (
     <div
@@ -131,11 +153,13 @@ function PlanCard({
         <span className="font-mono text-[12px] uppercase tracking-label text-gold sm:text-[13px] lg:text-[14px]">
           {offer.name}
         </span>
-        {offer.recommended && (
-          <span className="inline-flex max-w-full items-center rounded-full border border-gold/50 px-1.5 py-1 font-mono text-[8px] uppercase leading-none tracking-[0.12em] text-gold-hi sm:px-2 sm:text-[9px]">
-            Recommended
-          </span>
-        )}
+        {offer.recommended ? (
+          <div className="ml-auto flex max-w-full flex-wrap items-center justify-end gap-1.5">
+            <span className="inline-flex max-w-full items-center rounded-full border border-gold/50 px-1.5 py-1 font-mono text-[8px] uppercase leading-none tracking-[0.12em] text-gold-hi sm:px-2 sm:text-[9px]">
+              Recommended
+            </span>
+          </div>
+        ) : null}
       </div>
 
       <p className="border-b border-line py-4 font-mono text-[13px] text-muted sm:py-5 sm:text-[14px] lg:py-6 lg:text-[15px]">
@@ -143,7 +167,9 @@ function PlanCard({
       </p>
 
       <div className="border-b border-line py-4 sm:py-5 lg:py-6">
-        <div className="font-display text-[clamp(30px,6.5vw,42px)] text-white">{price}</div>
+        <div className="font-display text-[clamp(30px,6.5vw,42px)] text-white">
+          {price.displayLabel}
+        </div>
       </div>
       <p className="border-b border-line py-4 font-mono text-[13px] text-muted sm:py-5 sm:text-[14px] lg:py-6 lg:text-[15px]">
         {unit}

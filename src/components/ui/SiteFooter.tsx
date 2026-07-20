@@ -60,7 +60,7 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <h2 className="mb-8 font-serif text-[24px] text-[#e2e2e2]">Product</h2>
+            <h2 className="mb-8 font-serif text-[18px] text-[#e2e2e2]">Product</h2>
             <nav className="flex flex-col gap-4 text-[15px] text-[#b7b7b7]">
               {PRODUCT_LINKS.map(([label, href]) => (
                 <Link key={label} href={href} className="transition hover:text-gold">
@@ -71,7 +71,7 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <h2 className="mb-8 font-serif text-[24px] text-[#e2e2e2]">Legal</h2>
+            <h2 className="mb-8 font-serif text-[18px] text-[#e2e2e2]">Legal</h2>
             <nav className="flex flex-col gap-4 text-[15px] text-[#b7b7b7]">
               {LEGAL_LINKS.map(([label, href]) => (
                 <Link key={label} href={href} className="transition hover:text-gold">

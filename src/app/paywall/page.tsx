@@ -1,22 +1,24 @@
 import { Suspense } from "react";
 import { PricingPlans, type ProductIdMap } from "@/components/paywall/PricingPlans";
 import { BrandHeader } from "@/components/ui/BrandHeader";
-import { polarProductIdFor, TIERS, type BillingInterval } from "@/lib/config";
+import { polarProductIdFor, type BillingInterval } from "@/lib/config";
+import { resolveWebPlans } from "@/lib/plans";
 import { PaywallCanceledBanner } from "./PaywallCanceledBanner";
 
-function buildProductIdMap(): ProductIdMap {
+function buildProductIdMap(offerIds: string[]): ProductIdMap {
   const intervals: BillingInterval[] = ["month", "year"];
   const map: ProductIdMap = {};
-  for (const tier of TIERS) {
+  for (const offerId of offerIds) {
     for (const interval of intervals) {
-      map[`${tier.id}:${interval}`] = polarProductIdFor(tier.id, interval);
+      map[`${offerId}:${interval}`] = polarProductIdFor(offerId, interval);
     }
   }
   return map;
 }
 
-export default function PaywallPage() {
-  const productIds = buildProductIdMap();
+export default async function PaywallPage() {
+  const plans = await resolveWebPlans();
+  const productIds = buildProductIdMap(plans.tiers.map((tier) => tier.id));
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -39,7 +41,7 @@ export default function PaywallPage() {
           Every tier ships the full experience; pick the cadence that fits you.
         </p>
 
-        <PricingPlans productIds={productIds} />
+        <PricingPlans productIds={productIds} tiers={plans.tiers} features={plans.features} />
       </main>
     </div>
   );

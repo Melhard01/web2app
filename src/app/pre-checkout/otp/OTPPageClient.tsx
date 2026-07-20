@@ -9,6 +9,7 @@ type AuthApiPayload = {
   code?: string;
   message?: string;
   error?: string;
+  detail?: string;
   challengeId?: string;
 };
 
@@ -25,7 +26,7 @@ type PendingSignup = {
 const PENDING_SIGNUP_STORAGE_KEY = "epiminded.pendingSignup.v1";
 
 function normalizeAuthMessage(payload: AuthApiPayload | null) {
-  const raw = payload?.message || payload?.error || "";
+  const raw = payload?.message || payload?.error || payload?.detail || "";
   return raw.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
 }
 
@@ -47,12 +48,10 @@ export function OTPPageClient() {
     otp?: string;
     general?: string;
   }>({});
-  const [showCommunityIdNotice, setShowCommunityIdNotice] = useState(false);
   const [pendingSignup, setPendingSignup] = useState<PendingSignup | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    let communityIdNoticeTimer: ReturnType<typeof setTimeout> | null = null;
     try {
       const raw = sessionStorage.getItem(PENDING_SIGNUP_STORAGE_KEY);
       if (!raw) {
@@ -82,14 +81,6 @@ export function OTPPageClient() {
           registeredUserId:
             typeof parsed.registeredUserId === "string" ? parsed.registeredUserId : null,
         });
-        const hasCommunityId =
-          typeof parsed.communityId === "string" && parsed.communityId.trim().length > 0;
-        if (!hasCommunityId) {
-          setShowCommunityIdNotice(true);
-          communityIdNoticeTimer = setTimeout(() => {
-            setShowCommunityIdNotice(false);
-          }, 20000);
-        }
       }
     } catch {
       setBackendErrors({
@@ -98,9 +89,6 @@ export function OTPPageClient() {
     } finally {
       setHydrated(true);
     }
-    return () => {
-      if (communityIdNoticeTimer) clearTimeout(communityIdNoticeTimer);
-    };
   }, []);
 
   const otpClean = otpCode.trim();
@@ -181,7 +169,7 @@ export function OTPPageClient() {
           return;
         }
         setBackendErrors({
-          general: payload?.message || payload?.error || "Unable to verify OTP right now.",
+          general: payload?.message || payload?.error || payload?.detail || "Unable to verify OTP right now.",
         });
         return;
       }
@@ -263,12 +251,6 @@ export function OTPPageClient() {
           Enter your verification code
         </h1>
         <p className="m-0 mb-10 max-w-[38em] text-[17px] leading-[1.6] text-ash">{otpInfoMessage}</p>
-        {showCommunityIdNotice && (
-          <p className="mb-6 rounded-xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm text-gold-hi">
-            You skipped the community code. You can continue creating your account, but you&apos;ll
-            need to add a valid community code before accessing the mobile app.
-          </p>
-        )}
 
         <form
           onSubmit={onVerifyOtp}
