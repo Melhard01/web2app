@@ -1,18 +1,44 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { QRCode } from "./QRCode";
 import { Arrow } from "@/components/ui/Button";
 import { AndroidIcon, AppleIcon, CheckIcon } from "@/components/ui/icons";
+import { clsx } from "@/lib/clsx";
 import { STORES } from "@/lib/config";
 import type { ProvisionResult } from "@/lib/provision";
 
+const CARD_SHELL =
+  "rounded-[28px] border border-gold/70 bg-[linear-gradient(160deg,rgba(255,255,255,0.12)_0%,rgba(255,255,255,0.05)_45%,rgba(255,255,255,0.02)_100%)] backdrop-blur-2xl ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-20px_40px_rgba(0,0,0,0.42),0_0_0_1px_rgba(212,175,55,0.16),0_14px_36px_rgba(0,0,0,0.5)]";
+
+type PlatformKey = "android" | "ios";
+
+const PLATFORM_OPTIONS: {
+  key: PlatformKey;
+  icon: ReactNode;
+  label: string;
+  cta: string;
+  url: string;
+}[] = [
+  {
+    key: "android",
+    icon: <AndroidIcon className="h-6 w-6" />,
+    label: STORES.android.platform,
+    cta: "Get it on Google Play",
+    url: STORES.android.url,
+  },
+  {
+    key: "ios",
+    icon: <AppleIcon className="h-6 w-6" />,
+    label: STORES.ios.platform,
+    cta: "Download on the App Store",
+    url: STORES.ios.url,
+  },
+];
+
 /**
- * Handoff — the end of the web path. Two platform sections (Android & iOS),
- * each with the store QR, a copy field, and the platform logo. The entitlement
- * is bound to the buyer's email, so after installing and signing in the app
- * restores their plan with no second charge (the "already installed?" link uses
- * the signed deep-link token for instant unlock).
+ * Handoff — the end of the web path. One unified card with next steps +
+ * device selection, then a platform-specific QR that updates on choice.
  */
 export function MultiRailHandoff({ result }: { result: ProvisionResult }) {
   const { handoff: links, email, plan, tier, interval, addon } = result;
@@ -39,14 +65,13 @@ export function MultiRailHandoff({ result }: { result: ProvisionResult }) {
         </p>
       </header>
 
-      {/* Activation guide — the mental model before the store actions. */}
-      <section className="rounded-[18px] border border-gold/70 bg-[linear-gradient(160deg,rgba(255,255,255,0.12)_0%,rgba(255,255,255,0.05)_45%,rgba(255,255,255,0.02)_100%)] p-4 backdrop-blur-2xl ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-20px_40px_rgba(0,0,0,0.42),0_0_0_1px_rgba(212,175,55,0.16),0_14px_36px_rgba(0,0,0,0.5)] sm:p-5 lg:p-6">
+      <section className={`${CARD_SHELL} p-5 sm:p-6 lg:p-8`}>
         <p className="lab mb-3 sm:mb-4">What happens next</p>
         <ol className="flex flex-col gap-3 sm:gap-4">
           <NextStep
             n={1}
             title="Install the app"
-            body="Scan a QR code below, or tap your app store."
+            body="Choose your phone below, then scan the QR code or tap the store."
           />
           <NextStep
             n={2}
@@ -63,28 +88,11 @@ export function MultiRailHandoff({ result }: { result: ProvisionResult }) {
             body={`Your ${tier} plan activates automatically — you won’t be charged again.`}
           />
         </ol>
+
+        <div className="my-6 border-t border-gold/15 sm:my-8" />
+
+        <DeviceInstallPicker />
       </section>
-
-      <p className="text-center">
-        <span className="inline-block rounded-full border border-line bg-card px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-label text-muted">
-          Scan or tap to install on your phone
-        </span>
-      </p>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        <StoreSection
-          icon={<AndroidIcon className="h-5 w-5" />}
-          platform={STORES.android.platform}
-          url={STORES.android.url}
-          cta="Get it on Google Play"
-        />
-        <StoreSection
-          icon={<AppleIcon className="h-5 w-5" />}
-          platform={STORES.ios.platform}
-          url={STORES.ios.url}
-          cta="Download on the App Store"
-        />
-      </div>
 
       <div className="text-center">
         <a
@@ -93,6 +101,88 @@ export function MultiRailHandoff({ result }: { result: ProvisionResult }) {
         >
           Already installed? Open the app directly
         </a>
+      </div>
+    </div>
+  );
+}
+
+function DeviceInstallPicker() {
+  const [selected, setSelected] = useState<PlatformKey | null>(null);
+  const active = PLATFORM_OPTIONS.find((o) => o.key === selected) ?? null;
+
+  return (
+    <div className="mx-auto w-full max-w-lg">
+      <p className="mb-5 text-center sm:mb-6">
+        <span className="inline-block rounded-full border border-line bg-card/60 px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-label text-muted">
+          {selected ? "Scan or tap to install on your phone" : "Choose your device"}
+        </span>
+      </p>
+
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
+        {PLATFORM_OPTIONS.map((option) => {
+          const isActive = selected === option.key;
+          return (
+            <button
+              key={option.key}
+              type="button"
+              onClick={() =>
+                setSelected((current) => (current === option.key ? null : option.key))
+              }
+              aria-pressed={isActive}
+              className={clsx(
+                "flex flex-col items-center gap-3 rounded-2xl border px-4 py-5 transition duration-300 sm:py-6",
+                isActive
+                  ? "border-gold bg-gold/10 shadow-[0_0_0_1px_rgba(212,175,55,0.25)]"
+                  : "border-white/15 bg-white/[0.03] hover:border-gold/50 hover:bg-white/[0.05]",
+              )}
+            >
+              <span
+                className={clsx(
+                  "grid h-11 w-11 place-items-center rounded-xl border transition",
+                  isActive
+                    ? "border-gold/50 bg-[#0A0A0A] text-gold"
+                    : "border-gold/30 bg-[#0A0A0A] text-paper",
+                )}
+              >
+                {option.icon}
+              </span>
+              <span className="font-display text-[18px] font-semibold text-white sm:text-[20px]">
+                {option.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div
+        className={clsx(
+          "grid transition-[grid-template-rows,opacity] duration-500 ease-out",
+          selected ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+        )}
+      >
+        <div className="overflow-hidden">
+          {active ? (
+            <div
+              key={active.key}
+              className="flex flex-col items-center gap-4 pt-8 animate-rise"
+            >
+              <div className="rounded-[2px] bg-paper p-3 shadow-[0_12px_32px_rgba(0,0,0,0.35)]">
+                <QRCode value={active.url} size={168} />
+              </div>
+              <p className="m-0 font-mono text-[11px] uppercase tracking-label text-muted">
+                {active.label} install link
+              </p>
+              <a
+                href={active.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex w-full max-w-[280px] items-center justify-center gap-2 whitespace-nowrap rounded-[6px] bg-gold-cta px-4 py-2.5 text-[14px] font-semibold text-[#15110A] transition hover:bg-gold-hi"
+              >
+                {active.cta} <Arrow />
+              </a>
+            </div>
+          ) : null}
+        </div>
       </div>
     </div>
   );
@@ -117,43 +207,5 @@ function NextStep({
         <p className="m-0 mt-0.5 text-[12.5px] leading-[1.5] text-ash sm:text-[13.5px]">{body}</p>
       </div>
     </li>
-  );
-}
-
-function StoreSection({
-  icon,
-  platform,
-  url,
-  cta,
-}: {
-  icon: React.ReactNode;
-  platform: string;
-  url: string;
-  cta: string;
-}) {
-  return (
-    <section className="flex min-h-[430px] flex-col items-center gap-4 rounded-[2px] border border-gold/70 bg-[linear-gradient(160deg,rgba(255,255,255,0.12)_0%,rgba(255,255,255,0.05)_45%,rgba(255,255,255,0.02)_100%)] px-5 pb-5 pt-14 backdrop-blur-2xl ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-20px_40px_rgba(0,0,0,0.42),0_0_0_1px_rgba(212,175,55,0.16),0_14px_36px_rgba(0,0,0,0.5)]">
-      <div className="flex items-center gap-2.5">
-        <span className="grid h-9 w-9 flex-none place-items-center rounded-lg border border-gold/30 bg-[#0A0A0A] text-paper">
-          {icon}
-        </span>
-        <span className="font-display text-[20px] font-semibold text-white">
-          {platform}
-        </span>
-      </div>
-
-      <div className="rounded-[2px] bg-paper p-3">
-        <QRCode value={url} size={160} />
-      </div>
-
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-2 flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-[6px] bg-gold-cta px-4 py-2.5 text-[14px] font-semibold text-[#15110A] transition hover:bg-gold-hi"
-      >
-        {cta} <Arrow />
-      </a>
-    </section>
   );
 }

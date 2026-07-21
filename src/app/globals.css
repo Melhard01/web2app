@@ -225,3 +225,22 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Ultrawide 2560px+: lock dominant profile card to a fixed width. */
+@media (min-width: 2560px) {
+  .report-cards-grid {
+    grid-template-columns: 680px minmax(0, 1fr) !important;
+    gap: 2rem;
+    min-height: min(62vh, 42rem);
+  }
+
+  .report-profile-card {
+    width: 680px !important;
+    max-width: 680px !important;
+  }
+
+  /* Pricing table — slightly tighter than the widened desktop layout. */
+  .paywall-main {
+    max-width: 1440px !important;
+  }
+}

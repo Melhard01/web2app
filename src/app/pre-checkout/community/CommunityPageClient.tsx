@@ -55,16 +55,10 @@ export function CommunityPageClient() {
     <div className="flex min-h-screen flex-col">
       <BrandHeader step={1} />
       <main className="mx-auto w-full max-w-[900px] px-8 pb-20 pt-12 sm:px-12 sm:pt-16">
-        <div className="mb-6 flex justify-center">
-          <span className="inline-block rounded-full border border-gold/40 px-5 py-2 font-mono text-[12px] uppercase tracking-eyebrow text-gold">
-            Step 2 · Community
-          </span>
-        </div>
-
-        <h1 className="m-0 mb-4 font-display text-[clamp(30px,4.5vw,44px)] font-semibold leading-[1.08] tracking-[-0.01em] text-paper">
+        <h1 className="m-0 mb-4 text-center font-display text-[clamp(30px,4.5vw,44px)] font-semibold leading-[1.08] tracking-[-0.01em] text-paper">
           Link your community
         </h1>
-        <p className="m-0 mb-8 max-w-[40em] text-[17px] leading-[1.6] text-ash">
+        <p className="mx-auto m-0 mb-8 max-w-[40em] text-center text-[17px] leading-[1.6] text-ash">
           Activating the mobile app requires a Community ID, issued by your community admin or the
           person who referred you. If you don&apos;t have one, check with them before
           subscribing.

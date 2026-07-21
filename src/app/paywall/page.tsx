@@ -26,20 +26,17 @@ export default async function PaywallPage() {
       <Suspense fallback={null}>
         <PaywallCanceledBanner />
       </Suspense>
-      <main className="mx-auto w-full max-w-[1240px] px-8 pb-20 pt-12 sm:px-12 sm:pt-16 lg:px-20">
-        <div className="mb-6 flex justify-center">
-          <span className="inline-block rounded-full border border-gold/40 px-5 py-2 font-mono text-[12px] uppercase tracking-eyebrow text-gold">
-            Step 2 · Choose your plan
-          </span>
+      <main className="paywall-main mx-auto w-full max-w-[1240px] px-5 pb-16 pt-10 sm:px-8 sm:pb-20 sm:pt-14 md:px-10 lg:px-20 xl:max-w-[1360px] xl:px-12 uw:max-w-[1440px] uw:px-14">
+        <div className="mb-10 text-center sm:mb-14">
+          <h1 className="m-0 mb-4 font-display text-[clamp(28px,5vw,48px)] font-semibold leading-[1.08] tracking-[-0.01em] text-paper">
+            Unlock Your Community Experience
+          </h1>
+          <p className="mx-auto m-0 max-w-[36em] text-[15px] leading-[1.6] text-ash sm:text-[16px]">
+            A private peer network that helps you stay ahead of what is coming — a daily
+            thinking ritual paired with a cohort of matched peers no tool can give you.
+            Every tier ships the full experience; pick the cadence that fits you.
+          </p>
         </div>
-        <h1 className="m-0 mb-6 font-display text-[clamp(30px,5vw,46px)] font-semibold leading-[1.08] tracking-[-0.01em] text-paper">
-          Your matched Peers and Network waiting for you
-        </h1>
-        <p className="m-0 mb-12 max-w-[34em] text-[17px] leading-[1.6] text-ash">
-          A private peer network that helps you stay ahead of what is coming — a daily
-          thinking ritual paired with a cohort of matched peers no tool can give you.
-          Every tier ships the full experience; pick the cadence that fits you.
-        </p>
 
         <PricingPlans productIds={productIds} tiers={plans.tiers} features={plans.features} />
       </main>

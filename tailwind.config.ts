@@ -5,6 +5,10 @@ const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
+      screens: {
+        /** Ultrawide / QHD desktop (2560×1440 and up). */
+        uw: "2560px",
+      },
       colors: {
         // Black canvas + warm gold — matches the brand hero.
         canvas: "#000000",

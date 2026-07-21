@@ -64,8 +64,8 @@ export function ProfileRadar({
     <div
       className={
         embedded
-          ? "flex min-h-[340px] flex-col px-6 pb-5 pt-4"
-          : "premium-card flex min-h-[380px] flex-col bg-[linear-gradient(160deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_45%,rgba(255,255,255,0.03)_100%)] px-6 pb-4 pt-5 backdrop-blur-2xl ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-20px_40px_rgba(0,0,0,0.42),0_0_0_1px_rgba(212,175,55,0.14),0_14px_36px_rgba(0,0,0,0.5)]"
+          ? "flex min-h-0 flex-1 flex-col px-[clamp(1rem,2.2vw,1.5rem)] pb-[clamp(0.9rem,1.8vw,1.25rem)] pt-[clamp(0.75rem,1.4vw,1rem)] xl:px-8 xl:pb-7 xl:pt-5"
+          : "premium-card flex min-h-[clamp(22rem,58vw,34rem)] flex-col bg-[linear-gradient(160deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_45%,rgba(255,255,255,0.03)_100%)] px-6 pb-4 pt-5 backdrop-blur-2xl ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-20px_40px_rgba(0,0,0,0.42),0_0_0_1px_rgba(212,175,55,0.14),0_14px_36px_rgba(0,0,0,0.5)]"
       }
     >
       <p className="lab mb-1">How you scored across the four profiles</p>
@@ -77,7 +77,7 @@ export function ProfileRadar({
           aria-label={`Radar chart of your strategic profile scores. Dominant: ${
             QUIZ.profiles[activeKey]?.name ?? activeKey
           }.`}
-          className="mx-auto block h-full w-full max-h-[340px] max-w-[420px]"
+          className="mx-auto block h-full w-full max-h-[min(42vw,21rem)] max-w-[min(100%,26rem)] xl:max-h-[min(28vw,21rem)] xl:max-w-[min(100%,24rem)]"
         >
         {/* concentric grid rings */}
         {Array.from({ length: RINGS }, (_, level) => {

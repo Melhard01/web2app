@@ -35,11 +35,20 @@ const NAV = [
 export const ONBOARDING_STEPS = ["Profile", "Plan", "Open app"] as const;
 
 /** Onboarding progress — rendered below the navbar, not inside the navbar. */
-export function OnboardingStepper({ step }: { step: number }) {
+export function OnboardingStepper({
+  step,
+  className,
+}: {
+  step: number;
+  className?: string;
+}) {
   return (
     <nav
       aria-label="Onboarding progress"
-      className="mx-auto flex w-full max-w-[1180px] items-center justify-center gap-1.5 px-6 pb-5 pt-20 sm:gap-2.5"
+      className={clsx(
+        "mx-auto flex w-full max-w-[1180px] items-center justify-center gap-1.5 px-6 pb-3 pt-16 sm:gap-2.5 sm:pt-20",
+        className,
+      )}
     >
       {ONBOARDING_STEPS.map((label, i) => {
         const done = i < step;
@@ -64,7 +73,7 @@ export function OnboardingStepper({ step }: { step: number }) {
                   "grid h-6 w-6 flex-none place-items-center rounded-full border font-mono text-[11px] transition-colors",
                   done && "border-gold bg-gold text-[#15110A]",
                   active && "border-gold text-gold",
-                  !done && !active && "border-line text-muted",
+                  !done && !active && "border-white/80 text-white",
                 )}
               >
                 {done ? <CheckIcon className="h-3.5 w-3.5" /> : i + 1}
@@ -76,7 +85,7 @@ export function OnboardingStepper({ step }: { step: number }) {
                     ? "text-gold"
                     : done
                       ? "text-body hidden sm:inline"
-                      : "text-muted hidden sm:inline",
+                      : "text-white/80 hidden sm:inline",
                 )}
               >
                 {label}
@@ -111,10 +120,13 @@ export function BrandHeader({
   full = false,
   step,
   sticky = true,
+  stepperClassName,
 }: {
   full?: boolean;
   step?: number;
   sticky?: boolean;
+  /** Optional overrides for the onboarding stepper (e.g. pull it closer to the logo). */
+  stepperClassName?: string;
 }) {
   const [atTop, setAtTop] = useState(true);
 
@@ -157,7 +169,7 @@ export function BrandHeader({
       >
         <div
           className={clsx(
-            "mx-auto flex w-full max-w-[1180px] items-center px-6 py-0",
+            "flex w-full items-center py-0 pl-[4cm] pr-6",
             full ? "justify-between" : "justify-start",
           )}
         >
@@ -173,7 +185,9 @@ export function BrandHeader({
           )}
         </div>
       </header>
-      {typeof step === "number" && <OnboardingStepper step={step} />}
+      {typeof step === "number" && (
+        <OnboardingStepper step={step} className={stepperClassName} />
+      )}
     </>
   );
 }

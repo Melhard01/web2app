@@ -34,8 +34,8 @@ export default function ReportPage() {
       <div className="premium-ambient -z-10" aria-hidden />
       <span className="premium-beam -z-10 left-[-8%] top-[12%] h-[280px] w-[420px]" aria-hidden />
       <span className="premium-beam -z-10 right-[-6%] top-[8%] h-[240px] w-[360px]" aria-hidden />
-      <BrandHeader step={0} />
-      <main className="relative z-10 mx-auto w-full max-w-[980px] px-8 pb-20 pt-12 sm:px-12 sm:pt-16">
+      <BrandHeader step={0} stepperClassName="!pt-2 sm:!pt-3" />
+      <main className="relative z-10 mx-auto w-full max-w-[min(100%,80rem)] px-[clamp(1rem,3vw,2.5rem)] pb-[clamp(3rem,6vw,5rem)] pt-12 sm:pt-14 xl:max-w-[min(100%,88rem)] xl:px-[clamp(1.75rem,3.5vw,3rem)] xl:pb-20 xl:pt-16 uw:max-w-[120rem] uw:px-16">
         <ReportView
           profileKey={report.profileKey}
           profile={report.profile}

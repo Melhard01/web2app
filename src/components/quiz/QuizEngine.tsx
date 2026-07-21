@@ -137,14 +137,9 @@ function Intro({ onBegin }: { onBegin: () => void }) {
 
       {/* Header + content above the orb; no overflow on this wrapper so sticky works. */}
       <div className="relative z-10 flex min-h-screen flex-col">
-        <BrandHeader step={0} />
+        <BrandHeader />
         <main className="mx-auto flex w-full max-w-[640px] flex-1 flex-col justify-center px-[22px] pb-16">
           <div className="animate-rise text-center">
-            <div className="mb-[18px] flex justify-center">
-              <span className="inline-block rounded-full border border-gold/40 bg-black/25 px-5 py-2 font-mono text-[12px] uppercase tracking-eyebrow text-gold backdrop-blur-sm">
-                Step 1 · Find your profile
-              </span>
-            </div>
             <h1 className="m-0 mb-[22px] font-display text-[clamp(32px,5.5vw,48px)] font-semibold leading-[1.08] tracking-[-0.01em] text-paper drop-shadow-[0_2px_18px_rgba(0,0,0,0.55)]">
               Let&apos;s find your{" "}
               <em className="italic text-gold">strategic profile</em>
@@ -155,8 +150,8 @@ function Intro({ onBegin }: { onBegin: () => void }) {
               spot holding you back, and the cohort that would sharpen you.
             </p>
             <Button onClick={onBegin}>Begin →</Button>
-            <p className="mt-[26px] font-mono text-[12px] tracking-[0.04em] text-muted">
-              about 2 minutes · your answers shape your plan
+            <p className="mt-[26px] font-mono text-[12px] tracking-[0.04em] text-white">
+              A quick 2-minute quiz
             </p>
           </div>
         </main>

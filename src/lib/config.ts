@@ -141,7 +141,7 @@ export interface PlanOffer {
 const FREQUENCY_BY_ID: Record<OfferId, string> = {
   lite: "3 boosters / week",
   standard: "5 boosters / week",
-  pro: "Daily - 7 / week",
+  pro: "7 boosters / week",
 };
 
 function offerIdFromName(name: string | undefined): OfferId | null {

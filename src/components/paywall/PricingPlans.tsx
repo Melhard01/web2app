@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { clsx } from "@/lib/clsx";
+import { CheckIcon } from "@/components/ui/icons";
 import { useFunnel } from "@/lib/funnel/store";
 import {
   SHARED_FEATURES,
   TIERS,
   type BillingInterval,
+  type OfferId,
   type PlanOffer,
 } from "@/lib/config";
 import {
@@ -16,16 +18,22 @@ import {
 
 export type ProductIdMap = Record<string, string | undefined>;
 
+type FrameMetrics = {
+  /** Fixed frame size — always taken from the Standard (recommended) column. */
+  width: number;
+  height: number;
+  /** Absolute left offset of each plan column inside the table wrapper. */
+  leftById: Partial<Record<OfferId, number>>;
+  top: number;
+};
+
 function productKey(offerId: string, interval: BillingInterval): string {
   return `${offerId}:${interval}`;
 }
 
 /**
- * Pricing: three frequency tiers (Lite / Standard / Pro) that share the full
- * feature set — only the booster cadence and price differ. Subscribe CTAs route
- * through a details step before forwarding to Polar checkout.
- *
- * PlanOffer cents are mobile/base prices. Web display applies WEB_DISCOUNT_PERCENT.
+ * Pricing comparison table — matches the brand pricing design.
+ * A fixed-size gold frame (Standard dimensions) slides between columns on hover.
  */
 export function PricingPlans({
   productIds,
@@ -40,48 +48,336 @@ export function PricingPlans({
 }) {
   const { selectOffer } = useFunnel();
   const [interval, setInterval] = useState<BillingInterval>("month");
+  const [hoveredId, setHoveredId] = useState<OfferId | null>(null);
+
+  const tableWrapRef = useRef<HTMLDivElement | null>(null);
+  const tableRef = useRef<HTMLTableElement | null>(null);
+  const [frame, setFrame] = useState<FrameMetrics | null>(null);
+
+  const defaultHighlightId = useMemo(
+    () => tiers.find((tier) => tier.recommended)?.id ?? tiers[0]?.id ?? null,
+    [tiers],
+  );
+  const activeId = hoveredId ?? defaultHighlightId;
 
   const choose = (offer: PlanOffer) => {
     selectOffer({ offerId: offer.id, interval, addon: false });
   };
 
+  const unit = interval === "year" ? "/ year" : "/user-mo";
+  const activate = (id: OfferId) => setHoveredId(id);
+  const clearHover = () => setHoveredId(null);
+
+  const measureFrame = useCallback(() => {
+    const wrap = tableWrapRef.current;
+    const table = tableRef.current;
+    if (!wrap || !table || tiers.length === 0) return;
+
+    const wrapRect = wrap.getBoundingClientRect();
+    const referenceId = defaultHighlightId ?? tiers[0].id;
+    const leftById: Partial<Record<OfferId, number>> = {};
+    let width = 0;
+    let height = 0;
+    let top = 0;
+
+    tiers.forEach((tier, index) => {
+      // Column index in the table: 0 = feature labels, 1..n = plans
+      const colIndex = index + 2;
+      const header = table.querySelector(
+        `thead th:nth-child(${colIndex})`,
+      ) as HTMLElement | null;
+      const cells = table.querySelectorAll(
+        `tr > :nth-child(${colIndex})`,
+      ) as NodeListOf<HTMLElement>;
+      if (!header || cells.length === 0) return;
+
+      const first = cells[0];
+      const last = cells[cells.length - 1];
+      const firstRect = first.getBoundingClientRect();
+      const lastRect = last.getBoundingClientRect();
+
+      leftById[tier.id] = firstRect.left - wrapRect.left;
+
+      if (tier.id === referenceId) {
+        width = firstRect.width;
+        height = lastRect.bottom - firstRect.top;
+        top = firstRect.top - wrapRect.top;
+      }
+    });
+
+    if (width > 0 && height > 0) {
+      setFrame({ width, height, leftById, top });
+    }
+  }, [defaultHighlightId, tiers]);
+
+  useEffect(() => {
+    // Let layout settle (fonts / table-fixed) before the first measure.
+    const raf = window.requestAnimationFrame(() => measureFrame());
+
+    const wrap = tableWrapRef.current;
+    if (!wrap) {
+      return () => window.cancelAnimationFrame(raf);
+    }
+
+    const observer = new ResizeObserver(() => measureFrame());
+    observer.observe(wrap);
+    if (tableRef.current) observer.observe(tableRef.current);
+
+    window.addEventListener("resize", measureFrame);
+    return () => {
+      window.cancelAnimationFrame(raf);
+      observer.disconnect();
+      window.removeEventListener("resize", measureFrame);
+    };
+  }, [measureFrame, interval, features.length, tiers]);
+
+  const frameLeft =
+    activeId && frame?.leftById[activeId] != null ? frame.leftById[activeId]! : 0;
+
   return (
     <div className="animate-rise">
-      {/* billing toggle */}
-      <div className="mb-9 inline-flex rounded-full border border-line bg-card p-1">
-        <ToggleBtn active={interval === "month"} onClick={() => setInterval("month")}>
-          Monthly
-        </ToggleBtn>
-        <ToggleBtn active={interval === "year"} onClick={() => setInterval("year")}>
-          Annual <span className="text-gold">· save ~17%</span>
-        </ToggleBtn>
+      <div className="mb-10 flex justify-center">
+        <div className="inline-flex rounded-full border border-white/15 bg-transparent p-1">
+          <ToggleBtn active={interval === "month"} onClick={() => setInterval("month")}>
+            Monthly
+          </ToggleBtn>
+          <ToggleBtn active={interval === "year"} onClick={() => setInterval("year")}>
+            Annual{" "}
+            <span className={interval === "year" ? "text-[#15110A]/70" : "text-gold"}>
+              · save ~17%
+            </span>
+          </ToggleBtn>
+        </div>
       </div>
 
-      {/* tier cards */}
-      <div className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-3 md:gap-8">
-        {tiers.map((tier) => (
-          <PlanCard
-            key={tier.id}
-            offer={tier}
-            interval={interval}
-            platform={platform}
-            productId={productIds[productKey(tier.id, interval)]}
-            onChoose={choose}
-          />
-        ))}
+      {/* Desktop comparison table — lg+ only (768px tablets use stacked cards). */}
+      <div className="hidden lg:block" onMouseLeave={clearHover}>
+        {/*
+          Keep horizontal scroll for narrow desktops, but don't clip the gold
+          frame's rounded bottom — padding gives the border room to paint.
+        */}
+        <div className="overflow-x-auto pb-3">
+          <div ref={tableWrapRef} className="relative min-w-[720px] px-1 pb-5 pt-2">
+            {frame && activeId && frame.leftById[activeId] != null && (
+              <div
+                aria-hidden
+                className="pointer-events-none absolute z-10 rounded-[18px] border border-gold/80 transition-transform duration-300 ease-out"
+                style={{
+                  width: frame.width,
+                  height: frame.height,
+                  top: frame.top,
+                  left: 0,
+                  transform: `translateX(${frameLeft}px)`,
+                  willChange: "transform",
+                  background:
+                    "radial-gradient(120% 80% at 50% 20%, rgba(228,198,107,0.12) 0%, rgba(201,162,75,0.05) 42%, rgba(201,162,75,0.02) 70%, transparent 100%)",
+                  boxShadow:
+                    "0 0 0 1px rgba(212,175,55,0.22), inset 0 0 28px rgba(212,175,55,0.18), inset 0 0 56px rgba(201,162,75,0.1), inset 0 1px 0 rgba(255,236,180,0.2)",
+                }}
+              />
+            )}
+
+            <table
+              ref={tableRef}
+              className="relative z-0 w-full table-fixed border-collapse text-left"
+            >
+          <colgroup>
+            <col className="w-[28%]" />
+            {tiers.map((tier) => (
+              <col key={tier.id} />
+            ))}
+          </colgroup>
+          <thead>
+            <tr>
+              <th className="pb-6 pr-4" aria-hidden />
+              {tiers.map((tier) => (
+                <th
+                  key={tier.id}
+                  onMouseEnter={() => activate(tier.id)}
+                  className="relative px-4 pb-6 pt-5 text-center align-bottom"
+                >
+                  <div className="font-mono text-[12px] uppercase tracking-label text-paper">
+                    {tier.name}
+                    {tier.recommended ? (
+                      <span className="text-muted"> - RECOMMENDED</span>
+                    ) : null}
+                  </div>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="pr-4" />
+              {tiers.map((tier) => {
+                const mobileCents =
+                  interval === "year" ? tier.annualCents : tier.monthlyCents;
+                const price = resolvePlanPrice(mobileCents, platform);
+                return (
+                  <td
+                    key={tier.id}
+                    onMouseEnter={() => activate(tier.id)}
+                    className="px-4 pb-1 text-center"
+                  >
+                    <div className="font-display text-[clamp(28px,3.5vw,40px)] font-semibold leading-none text-paper">
+                      {price.displayLabel}
+                    </div>
+                  </td>
+                );
+              })}
+            </tr>
+            <tr>
+              <td className="pr-4" />
+              {tiers.map((tier) => (
+                <td
+                  key={tier.id}
+                  onMouseEnter={() => activate(tier.id)}
+                  className="px-4 pb-5 text-center font-mono text-[12px] text-muted"
+                >
+                  {unit}
+                </td>
+              ))}
+            </tr>
+
+            <tr className="bg-white/[0.04]">
+              <td className="rounded-l-lg py-4 pl-4 pr-4 font-mono text-[12px] uppercase tracking-label text-gold">
+                Booster cadence
+              </td>
+              {tiers.map((tier) => (
+                <td
+                  key={tier.id}
+                  onMouseEnter={() => activate(tier.id)}
+                  className="px-4 py-4 text-center text-[14px] text-body"
+                >
+                  {tier.frequency}
+                </td>
+              ))}
+            </tr>
+
+            {features.map((feature) => (
+              <tr key={feature} className="border-t border-white/10">
+                <td className="py-3.5 pr-4 text-[14px] leading-snug text-paper">{feature}</td>
+                {tiers.map((tier) => (
+                  <td
+                    key={tier.id}
+                    onMouseEnter={() => activate(tier.id)}
+                    className="px-4 py-3.5 text-center"
+                  >
+                    <span className="inline-flex text-gold">
+                      <CheckIcon className="mx-auto h-4 w-4" />
+                    </span>
+                  </td>
+                ))}
+              </tr>
+            ))}
+
+            <tr>
+              <td className="pr-4 pt-8" />
+              {tiers.map((tier) => {
+                const id = productIds[productKey(tier.id, interval)];
+                const href = id ? `/pre-checkout/community?products=${id}` : undefined;
+                const active = tier.id === activeId;
+                return (
+                  <td
+                    key={tier.id}
+                    onMouseEnter={() => activate(tier.id)}
+                    className="px-4 pt-8 pb-6 text-center align-top"
+                  >
+                    {href ? (
+                      <a
+                        href={href}
+                        onClick={() => choose(tier)}
+                        className={subscribeButtonClass(active)}
+                      >
+                        Subscribe
+                      </a>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled
+                        className={subscribeButtonClass(false, true)}
+                      >
+                        Subscribe
+                      </button>
+                    )}
+                    {!id && (
+                      <p className="mt-2 font-mono text-[10px] text-muted">
+                        Set POLAR_PRODUCT_{tier.id.toUpperCase()}_{interval.toUpperCase()}
+                      </p>
+                    )}
+                  </td>
+                );
+              })}
+            </tr>
+          </tbody>
+          </table>
+          </div>
+        </div>
       </div>
 
-      {/* shared feature set */}
-      <div className="mt-10">
-        <p className="lab mb-4">Every tier includes</p>
-        <ul className="grid gap-2.5 sm:grid-cols-2">
-          {features.map((f) => (
-            <li key={f} className="flex items-start gap-3 text-[14.5px] text-body">
-              <span className="mt-[7px] h-1.5 w-1.5 flex-none rounded-full bg-gold" />
-              {f}
-            </li>
-          ))}
-        </ul>
+      {/* Stacked cards for mobile + tablet (≤1023px), including 768. */}
+      <div className="mx-auto flex w-full max-w-[420px] flex-col gap-5 md:max-w-[520px] lg:hidden">
+        {tiers.map((tier) => {
+          const mobileCents =
+            interval === "year" ? tier.annualCents : tier.monthlyCents;
+          const price = resolvePlanPrice(mobileCents, platform);
+          const id = productIds[productKey(tier.id, interval)];
+          const href = id ? `/pre-checkout/community?products=${id}` : undefined;
+          const active = tier.id === activeId;
+
+          return (
+            <div
+              key={tier.id}
+              onMouseEnter={() => activate(tier.id)}
+              onMouseLeave={clearHover}
+              className={clsx(
+                "rounded-[22px] border p-5 transition-[border-color,background] duration-200",
+                active
+                  ? "border-gold bg-[linear-gradient(160deg,rgba(201,162,75,0.14)_0%,rgba(201,162,75,0.04)_100%)]"
+                  : "border-white/15 bg-white/[0.03]",
+              )}
+            >
+              <div className="font-mono text-[12px] uppercase tracking-label text-paper">
+                {tier.name}
+                {tier.recommended ? (
+                  <span className="text-muted"> - RECOMMENDED</span>
+                ) : null}
+              </div>
+              <div className="mt-3 font-display text-[36px] font-semibold leading-none text-paper">
+                {price.displayLabel}
+              </div>
+              <p className="mt-1 font-mono text-[12px] text-muted">{unit}</p>
+              <p className="mt-4 font-mono text-[12px] uppercase tracking-label text-gold">
+                {tier.frequency}
+              </p>
+              <ul className="mt-4 space-y-2.5 border-t border-white/10 pt-4">
+                {features.map((feature) => (
+                  <li key={feature} className="flex items-start gap-2.5 text-[13.5px] text-body">
+                    <CheckIcon className="mt-0.5 h-3.5 w-3.5 flex-none text-gold" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+              {href ? (
+                <a
+                  href={href}
+                  onClick={() => choose(tier)}
+                  className={clsx(subscribeButtonClass(active), "mt-6")}
+                >
+                  Subscribe
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className={clsx(subscribeButtonClass(false, true), "mt-6")}
+                >
+                  Subscribe
+                </button>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -98,10 +394,11 @@ function ToggleBtn({
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className={clsx(
-        "rounded-full px-4 py-2 font-sans text-sm transition",
-        active ? "bg-gold-cta text-[#15110A]" : "text-muted hover:text-body",
+        "rounded-full px-5 py-2.5 font-sans text-sm transition",
+        active ? "bg-gold-cta text-[#15110A]" : "text-paper hover:text-gold",
       )}
     >
       {children}
@@ -109,94 +406,13 @@ function ToggleBtn({
   );
 }
 
-function subscribeButtonClass(recommended: boolean, disabled = false) {
+function subscribeButtonClass(emphasized: boolean, disabled = false) {
   return clsx(
-    "mt-8 mt-auto box-border flex h-11 w-full shrink-0 touch-manipulation items-center justify-center rounded-full border-2 px-5 text-center font-sans text-[14px] font-semibold leading-none transition sm:mt-12 sm:h-12 sm:px-6 sm:text-[15px] lg:mt-16 lg:h-14 lg:text-[16px]",
+    "inline-flex h-11 w-full max-w-[200px] items-center justify-center rounded-full border px-6 font-sans text-[14px] font-semibold transition",
     disabled
-      ? "cursor-not-allowed border-line bg-card text-muted opacity-60"
-      : recommended
-        ? "border-transparent bg-gold-cta text-[#15110A] hover:bg-gold-hi active:scale-[0.98]"
-        : "border-line bg-card text-body hover:border-gold active:scale-[0.98]",
-  );
-}
-
-function PlanCard({
-  offer,
-  interval,
-  platform,
-  productId,
-  onChoose,
-}: {
-  offer: PlanOffer;
-  interval: BillingInterval;
-  platform: PricingPlatform;
-  productId: string | undefined;
-  onChoose: (offer: PlanOffer) => void;
-}) {
-  const isAnnual = interval === "year";
-  const mobileCents = isAnnual ? offer.annualCents : offer.monthlyCents;
-  const price = resolvePlanPrice(mobileCents, platform);
-  const unit = isAnnual ? "/ year" : "/ user / month";
-  const checkoutHref = productId
-    ? `/pre-checkout/community?products=${productId}`
-    : undefined;
-
-  return (
-    <div
-      className={clsx(
-        "flex min-h-[440px] flex-col rounded-[28px] border bg-[linear-gradient(160deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_45%,rgba(255,255,255,0.03)_100%)] p-6 backdrop-blur-2xl ring-1 ring-white/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_0_1px_rgba(228,198,107,0.28),0_20px_44px_rgba(0,0,0,0.58)] sm:min-h-[500px] sm:p-8 lg:min-h-[540px] lg:p-10",
-        "shadow-[inset_0_1px_0_rgba(255,255,255,0.22),inset_0_-20px_40px_rgba(0,0,0,0.42),0_0_0_1px_rgba(212,175,55,0.12),0_12px_34px_rgba(0,0,0,0.5)]",
-        offer.recommended ? "border-gold" : "border-gold/70",
-      )}
-    >
-      <div className="flex flex-col items-start gap-2 border-b border-line pb-4 sm:pb-5 lg:flex-row lg:items-center lg:justify-between lg:gap-3 lg:pb-6">
-        <span className="font-mono text-[12px] uppercase tracking-label text-gold sm:text-[13px] lg:text-[14px]">
-          {offer.name}
-        </span>
-        {offer.recommended ? (
-          <div className="ml-auto flex max-w-full flex-wrap items-center justify-end gap-1.5">
-            <span className="inline-flex max-w-full items-center rounded-full border border-gold/50 px-1.5 py-1 font-mono text-[8px] uppercase leading-none tracking-[0.12em] text-gold-hi sm:px-2 sm:text-[9px]">
-              Recommended
-            </span>
-          </div>
-        ) : null}
-      </div>
-
-      <p className="border-b border-line py-4 font-mono text-[13px] text-muted sm:py-5 sm:text-[14px] lg:py-6 lg:text-[15px]">
-        {offer.frequency}
-      </p>
-
-      <div className="border-b border-line py-4 sm:py-5 lg:py-6">
-        <div className="font-display text-[clamp(30px,6.5vw,42px)] text-white">
-          {price.displayLabel}
-        </div>
-      </div>
-      <p className="border-b border-line py-4 font-mono text-[13px] text-muted sm:py-5 sm:text-[14px] lg:py-6 lg:text-[15px]">
-        {unit}
-      </p>
-
-      <p className="mt-5 flex-1 text-[15px] leading-[1.55] text-ash sm:mt-6 sm:text-[16px] lg:mt-7 lg:text-[17px]">
-        {offer.blurb}
-      </p>
-
-      {checkoutHref ? (
-        <a
-          href={checkoutHref}
-          onClick={() => onChoose(offer)}
-          className={subscribeButtonClass(Boolean(offer.recommended))}
-        >
-          Subscribe
-        </a>
-      ) : (
-        <button type="button" disabled className={subscribeButtonClass(false, true)}>
-          Subscribe
-        </button>
-      )}
-      {!productId && (
-        <p className="mt-2 text-center font-mono text-[10px] text-muted">
-          Set POLAR_PRODUCT_{offer.id.toUpperCase()}_{interval.toUpperCase()}
-        </p>
-      )}
-    </div>
+      ? "cursor-not-allowed border-line text-muted opacity-60"
+      : emphasized
+        ? "border-transparent bg-gold-cta text-[#15110A] hover:bg-gold-hi"
+        : "border-paper/70 bg-transparent text-paper hover:border-gold hover:text-gold",
   );
 }
